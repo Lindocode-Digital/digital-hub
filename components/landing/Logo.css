@@ -1,0 +1,207 @@
+.tm-logo-lamp-container {
+  position: relative;
+  display: inline-block;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+
+.tm-logo-lamp-post {
+  position: relative;
+  display: block;
+}
+
+.tm-logo-lamp-dot {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+}
+
+.tm-logo-lamp-head {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 30px 30px 0px 0px;
+}
+
+.tm-logo-lamp-bulb {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: block;
+  border-radius: 999px;
+}
+
+.tm-logo-lamp-rays {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.tm-logo-ray {
+  display: block;
+  border-radius: 999px;
+}
+
+.tm-logo-ray.left {
+  transform: rotate(45deg);
+  transform-origin: top center;
+}
+
+.tm-logo-ray.center {
+  transform: rotate(0deg);
+  transform-origin: top center;
+}
+
+.tm-logo-ray.right {
+  transform: rotate(-45deg);
+  transform-origin: top center;
+}
+
+.company-name-skeleton-wrap {
+  position: relative;
+}
+
+.company-name-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.58),
+    rgba(255, 255, 255, 0.28)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.company-name-skeleton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      rgba(255, 255, 255, 0.36),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(255, 255, 255, 0.22),
+      transparent 36%
+    );
+  opacity: 0.9;
+}
+
+.company-name-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.72) 42%,
+    rgba(255, 255, 255, 0) 74%
+  );
+  animation: companyNameSkeletonSweep 1.45s cubic-bezier(0.4, 0, 0.2, 1)
+    infinite;
+}
+
+.company-name-skeleton-main {
+  border-radius: 0.9rem;
+}
+
+.company-name-skeleton-sub {
+  border-radius: 999px;
+}
+
+.company-name-enter {
+  animation: companyNameFadeIn 0.55s ease-out both;
+}
+
+.company-name-letter {
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  animation: companyNameLetterIn 0.5s ease-out forwards;
+}
+
+.company-name-logo-pop {
+  opacity: 0;
+  transform: translateY(10px) scale(0.96);
+  animation: companyNameLogoIn 0.55s ease-out forwards;
+}
+
+.company-name-digital {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: companyNameDigitalIn 0.55s ease-out 220ms forwards;
+}
+
+@keyframes companyNameSkeletonSweep {
+  0% {
+    transform: translateX(-38%);
+  }
+  100% {
+    transform: translateX(58%);
+  }
+}
+
+@keyframes companyNameFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes companyNameLetterIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes companyNameLogoIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes companyNameDigitalIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .company-name-skeleton::after,
+  .company-name-enter,
+  .company-name-letter,
+  .company-name-logo-pop,
+  .company-name-digital {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

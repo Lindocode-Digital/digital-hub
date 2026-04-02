@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Lemon Milk Pro";
+  src: url("/fonts/Lemon-Milk-Pro-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: var(--font-jost);
+  --font-display: var(--font-playfair);
+  --font-alt: var(--font-montserrat);
+  --font-lemon: "Lemon Milk Pro", sans-serif;
+  --color-brand: #e11d48;
+  --color-muted: #4b5563;
+  --color-soft: #6b7280;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  body {
+    font-family: var(--font-jost), sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    background: transparent;
+    color: #171717;
+    position: relative;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  /* Background layer with image + gradients */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+
+    background-image:
+      radial-gradient(
+        circle at 30% 40%,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at 70% 60%,
+        rgba(255, 255, 255, 0.1) 0%,
+        transparent 40%
+      ),
+      radial-gradient(
+        circle at 10% 80%,
+        rgba(0, 0, 0, 0.02) 0%,
+        transparent 30%
+      ),
+      radial-gradient(
+        circle at 90% 20%,
+        rgba(0, 0, 0, 0.02) 0%,
+        transparent 40%
+      ),
+      url("https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/background/bg01.webp");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: transparent;
+  }
+
+  /* Vignette effect */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background: radial-gradient(
+      ellipse at center,
+      rgba(255, 255, 255, 0) 55%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+    mix-blend-mode: multiply;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .perspective-1500 {
+    perspective: 1500px;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  .min-h-screen-dynamic {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .h-screen-dynamic {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .viewport-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
