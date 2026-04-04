@@ -20,8 +20,19 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Lindocode Digital",
-  description: "Elegant simplicity. Innovate. Build. Scale.",
+  title: "Lindocode Digital | Web & Mobile App Development Solutions",
+  description:
+    "Lindocode Digital builds modern web and mobile applications, automation systems, and API integrations. We deliver scalable, high-performance digital solutions.",
+
+  openGraph: {
+    title: "Lindocode Digital",
+    description:
+      "Modern web and mobile app development, automation, and API integration.",
+    url: "https://lindocode.com",
+    siteName: "Lindocode Digital",
+    type: "website",
+  },
+
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
