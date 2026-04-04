@@ -13,11 +13,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/projects",
-        destination: "https://projects-mu-six.vercel.app/projects",
+        destination: "https://projects-rho-tan.vercel.app/projects",
       },
       {
         source: "/projects/:path*",
-        destination: "https://projects-mu-six.vercel.app/projects/:path*",
+        destination: "https://projects-rho-tan.vercel.app/projects/:path*",
       },
     ];
   },
