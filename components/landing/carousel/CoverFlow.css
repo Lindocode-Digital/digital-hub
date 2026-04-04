@@ -109,24 +109,61 @@
 .lm-project-title {
   position: relative;
   z-index: 3;
+
   font-size: 0.75em;
-  color: black;
-  border: 2px solid red;
-  background-color: white;
-  display: inline-block;
-  padding: 0.3em 0.5em;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+
+  color: var(--title-color, #ffffff);
+
+  padding: 0.4em 0.8em;
   border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  margin: 5px;
-  align-content: center;
-  justify-content: center;
-  align-items: center;
-  justify-items: center;
-  font-weight: 600;
-  max-width: 90%;
+
+  margin: 8px;
+
+  max-width: 85%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  /* glass base */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  );
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  /* soft elevation */
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.35),
+    inset 0 0 0.5px rgba(255, 255, 255, 0.25);
+
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.lm-project-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    120deg,
+    rgba(255, 120, 255, 0.25),
+    rgba(120, 180, 255, 0.25),
+    rgba(120, 255, 180, 0.25)
+  );
+
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  z-index: -1;
+  filter: blur(12px);
 }
 
 /* Animation for initial render */
@@ -321,4 +358,28 @@
   .coverflow-wrapper {
     margin: 0 0 5em 0;
   }
+}
+.coverflow-card.active .lm-project-title {
+  transform: translateY(-3px) scale(1.06);
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(255, 255, 255, 0.04)
+  );
+
+  border-color: rgba(255, 255, 255, 0.3);
+
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.45),
+    inset 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+/* activate glow */
+.coverflow-card.active .lm-project-title::after {
+  opacity: 1;
+}
+
+.coverflow-card:hover .lm-project-title {
+  transform: translateY(-2px) scale(1.03);
 }
