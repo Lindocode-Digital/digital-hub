@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import type { Project } from "@/lib/projects";
 
 type CoverItem = Project & {
   image: string;
   alt?: string;
   "card-title"?: string;
+};
+type TitleStyle = CSSProperties & {
+  "--title-color"?: string;
 };
 
 type CoverFlowCardProps = {
@@ -66,7 +69,10 @@ export default function CoverFlowCard({
         />
       </div>
 
-      <span className="lm-project-title font-lemon">
+      <span
+        className="lm-project-title font-lemon"
+        style={{ "--title-color": cover.color } as TitleStyle}
+      >
         {cover["card-title"] ?? cover.title}
       </span>
     </div>

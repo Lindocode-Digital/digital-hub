@@ -32,6 +32,7 @@ export type Project = {
   icons: ProjectIcon[];
   seo?: ProjectSeo;
   link?: string;
+  color?: string;
 };
 
 export const projects: Project[] = [
@@ -45,6 +46,7 @@ export const projects: Project[] = [
     image:
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards.webp",
     background: "",
+    color: "",
     link: "/projects",
     attribute: {
       artistName: "Kelly Sikkema",
@@ -90,6 +92,7 @@ export const projects: Project[] = [
     image:
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards7.webp",
     background: "",
+    color: "",
     link: "/",
     attribute: {
       artistName: "Kelly Sikkema",
@@ -135,6 +138,7 @@ export const projects: Project[] = [
     image:
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards6.webp",
     background: "",
+    color: "",
     link: "",
     attribute: {
       artistName: "Andrew Neel",
