@@ -134,8 +134,8 @@ export const projects: Project[] = [
     slug: "sdrow-vieli",
     title: "Sdrow Vieli",
     cardTitle: "SDROW VIELI",
-    cardSubtitle: "Explore Books",
-    description: "Into the Art of Storytelling",
+    cardSubtitle: "Writing",
+    description: "Art of Storytelling",
     image:
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards6.webp",
     background: "",
@@ -179,9 +179,9 @@ export const projects: Project[] = [
 
   {
     slug: "projects",
-    title: "Showcase",
-    cardTitle: "PROJECTS SHOWCASE",
-    cardSubtitle: "Explore Books",
+    title: "Projects",
+    cardTitle: "SHOWCASE",
+    cardSubtitle: "Projects",
     description: "Into the Art of Storytelling",
     image:
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/lazy-appz.webp",

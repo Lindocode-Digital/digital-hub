@@ -10,162 +10,6 @@
   animation: wrapperFadeIn 0.6s ease-out;
 }
 
-.coverflow-card {
-  position: absolute;
-  width: 200px;
-  aspect-ratio: 1;
-  cursor: pointer;
-  transition:
-    transform 0.5s ease,
-    z-index 0.5s ease,
-    opacity 0.45s ease,
-    box-shadow 0.3s ease;
-  box-shadow: 0 4.5px 5px 0 rgba(0, 0, 0, 0.6);
-  border-radius: 10px;
-  overflow: hidden;
-  -webkit-box-reflect: below 0.5em
-    linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.25));
-}
-
-/* Image layer */
-.coverflow-card-media {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  overflow: hidden;
-  background: linear-gradient(135deg, #141414, #0b0b0b);
-  z-index: 0;
-}
-
-.coverflow-card-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0;
-  transition: opacity 0.45s ease;
-  z-index: 1;
-  user-select: none;
-  -webkit-user-drag: none;
-}
-
-.coverflow-card-image.is-visible {
-  opacity: 1;
-}
-
-/* Shimmer base */
-.coverflow-card.loading .coverflow-card-media::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #141414, #0b0b0b);
-  z-index: 0;
-}
-
-/* Shimmer sweep */
-.coverflow-card.loading .coverflow-card-media::after {
-  content: "";
-  position: absolute;
-  inset: -35%;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.15) 45%,
-    rgba(255, 255, 255, 0) 75%
-  );
-  animation: coverflowShimmer 1.2s linear infinite;
-  z-index: 1;
-}
-
-.coverflow-card.loaded .coverflow-card-media::before,
-.coverflow-card.loaded .coverflow-card-media::after {
-  content: none;
-}
-
-/* Optional overlay */
-.coverflow-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0);
-  transition: background 0.3s ease;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.coverflow-card:hover::before {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-/* Active card styling */
-.coverflow-card.active {
-  border-color: transparent;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
-.lm-project-title {
-  position: relative;
-  z-index: 3;
-
-  font-size: 0.75em;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-
-  color: var(--title-color, #ffffff);
-
-  padding: 0.4em 0.8em;
-  border-radius: 999px;
-
-  margin: 8px;
-
-  max-width: 85%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  /* glass base */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.02)
-  );
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  border: 1px solid rgba(255, 255, 255, 0.15);
-
-  /* soft elevation */
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.35),
-    inset 0 0 0.5px rgba(255, 255, 255, 0.25);
-
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.lm-project-title::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-
-  background: linear-gradient(
-    120deg,
-    rgba(255, 120, 255, 0.25),
-    rgba(120, 180, 255, 0.25),
-    rgba(120, 255, 180, 0.25)
-  );
-
-  opacity: 0;
-  transition: opacity 0.3s ease;
-
-  z-index: -1;
-  filter: blur(12px);
-}
-
 /* Animation for initial render */
 @keyframes wrapperFadeIn {
   0% {
@@ -178,31 +22,11 @@
   }
 }
 
-@keyframes coverflowShimmer {
-  0% {
-    transform: translateX(-35%);
-  }
-  100% {
-    transform: translateX(55%);
-  }
-}
-
 /* Mobile Portrait (up to 767px) */
 @media (max-width: 767px) {
   .coverflow-wrapper {
     height: 320px;
     margin: 0 0 0 0;
-  }
-
-  .coverflow-card {
-    width: 180px;
-    border-radius: 8px;
-    -webkit-box-reflect: below 0.3em
-      linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));
-  }
-
-  .lm-project-title {
-    font-size: 0.5em;
   }
 }
 
@@ -212,10 +36,6 @@
     height: 280px;
     margin: 0 0 0 0;
   }
-
-  .coverflow-card {
-    width: 150px;
-  }
 }
 
 /* Small Mobile (up to 480px) */
@@ -223,12 +43,6 @@
   .coverflow-wrapper {
     height: 280px;
     margin: 0 0 0 0;
-  }
-
-  .coverflow-card {
-    width: 160px;
-    -webkit-box-reflect: below 0.25em
-      linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.1));
   }
 }
 
@@ -238,10 +52,6 @@
     height: 240px;
     margin: 0 0 0 0;
   }
-
-  .coverflow-card {
-    width: 190px;
-  }
 }
 
 /* Very Small Devices (up to 360px) */
@@ -249,10 +59,6 @@
   .coverflow-wrapper {
     height: 240px;
     margin: 4rem 0;
-  }
-
-  .coverflow-card {
-    width: 8.5rem;
   }
 }
 
@@ -262,12 +68,6 @@
     height: 380px;
     margin: 0 0 0 0;
   }
-
-  .coverflow-card {
-    width: 220px;
-    -webkit-box-reflect: below 0.4em
-      linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2));
-  }
 }
 
 /* Tablet Landscape (768px to 1024px) */
@@ -275,10 +75,6 @@
   .coverflow-wrapper {
     height: 360px;
     margin: 0 0 0 0;
-  }
-
-  .coverflow-card {
-    width: 180px;
   }
 }
 
@@ -288,10 +84,6 @@
     height: 400px;
     margin: 0 0 0 0;
   }
-
-  .coverflow-card {
-    width: 210px;
-  }
 }
 
 /* Desktop (1281px and above) */
@@ -299,12 +91,6 @@
   .coverflow-wrapper {
     height: 450px;
     margin: 0 0 0 0;
-  }
-
-  .coverflow-card {
-    width: 250px;
-    -webkit-box-reflect: below 0.5em
-      linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.25));
   }
 }
 
@@ -314,43 +100,11 @@
     height: 500px;
     margin: 0 0 0 0;
   }
-
-  .coverflow-card {
-    width: 250px;
-  }
 }
 
-/* Touch device optimizations */
-@media (hover: none) and (pointer: coarse) {
-  .coverflow-card {
-    transition:
-      transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1),
-      opacity 0.3s ease,
-      z-index 0.3s ease,
-      box-shadow 0.3s ease;
-  }
-
-  .coverflow-card:active {
-    transform: scale(0.98);
-  }
-}
-
-/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  .coverflow-card {
-    transition: none;
-  }
-
   .coverflow-wrapper {
     animation: none;
-  }
-
-  .coverflow-card.loading .coverflow-card-media::after {
-    animation: none;
-  }
-
-  .coverflow-card-image {
-    transition: none;
   }
 }
 
@@ -358,28 +112,4 @@
   .coverflow-wrapper {
     margin: 0 0 5em 0;
   }
-}
-.coverflow-card.active .lm-project-title {
-  transform: translateY(-3px) scale(1.06);
-
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.12),
-    rgba(255, 255, 255, 0.04)
-  );
-
-  border-color: rgba(255, 255, 255, 0.3);
-
-  box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.45),
-    inset 0 0 1px rgba(255, 255, 255, 0.35);
-}
-
-/* activate glow */
-.coverflow-card.active .lm-project-title::after {
-  opacity: 1;
-}
-
-.coverflow-card:hover .lm-project-title {
-  transform: translateY(-2px) scale(1.03);
 }
