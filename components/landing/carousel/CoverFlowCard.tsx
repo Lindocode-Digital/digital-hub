@@ -2,12 +2,26 @@
 
 import { useState, type CSSProperties } from "react";
 import type { Project } from "@/lib/projects";
+import "./CoverFlowCard.css";
+
+type CoverIcon = {
+  src: string;
+  size?: number;
+  alt?: string;
+};
 
 type CoverItem = Project & {
   image: string;
   alt?: string;
   "card-title"?: string;
+  cardTitle?: string;
+  cardSubtitle?: string;
+  description?: string;
+  extra?: string;
+  icons?: CoverIcon[];
+  indexLabel?: string;
 };
+
 type TitleStyle = CSSProperties & {
   "--title-color"?: string;
 };
@@ -16,6 +30,7 @@ type CoverFlowCardProps = {
   cover: CoverItem;
   isActive: boolean;
   offset: number;
+  indexLabel?: string;
   onAction: () => void;
 };
 
@@ -23,9 +38,15 @@ export default function CoverFlowCard({
   cover,
   isActive,
   offset,
+  indexLabel,
   onAction,
 }: CoverFlowCardProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+
+  const displayTitle = cover.cardTitle ?? cover["card-title"] ?? cover.title;
+  const displaySubtitle = cover.cardSubtitle;
+  const displayDescription = cover.description;
+  const displayExtra = cover.extra;
 
   return (
     <div
@@ -67,14 +88,72 @@ export default function CoverFlowCard({
           onLoad={() => setIsLoaded(true)}
           onError={() => setIsLoaded(true)}
         />
-      </div>
 
-      <span
-        className="lm-project-title font-lemon"
-        style={{ "--title-color": cover.color } as TitleStyle}
-      >
-        {cover["card-title"] ?? cover.title}
-      </span>
+        <div className="cflow-ui-overlay" />
+
+        <div className="cflow-ui-shell">
+          <div className="cflow-ui-topline">
+            <span className="cflow-ui-index">
+              {indexLabel ?? String(Math.abs(offset) + 1).padStart(2, "0")}
+            </span>{" "}
+            <div className="cflow-ui-line" />
+          </div>
+
+          <div className="cflow-ui-content">
+            <div className="cflow-ui-chip-row">
+              <span className="cflow-ui-chip">
+                {displaySubtitle || "View Project"}
+              </span>
+
+              {/* {cover.icons?.length ? ( */}
+              {/*   <div className="cflow-ui-icons" aria-hidden="true"> */}
+              {/*     {cover.icons.slice(0, 3).map((icon, index) => ( */}
+              {/*       <img */}
+              {/*         key={`${icon.src}-${index}`} */}
+              {/*         src={icon.src} */}
+              {/*         alt={icon.alt || ""} */}
+              {/*         className="cflow-ui-icon" */}
+              {/*         style={{ */}
+              {/*           width: icon.size ? `${icon.size}px` : "16px", */}
+              {/*           height: icon.size ? `${icon.size}px` : "16px", */}
+              {/*         }} */}
+              {/*       /> */}
+              {/*     ))} */}
+              {/*   </div> */}
+              {/* ) : null} */}
+            </div>
+
+            <div className="cflow-ui-panel">
+              {/*  <p className="cflow-ui-kicker">{cover.title}</p> */}
+
+              <h3
+                className="cflow-ui-title font-lemon"
+                style={
+                  { "--title-color": cover.color || "#111827" } as TitleStyle
+                }
+              >
+                {displayTitle}
+              </h3>
+
+              {displayDescription ? (
+                <p className="cflow-ui-subtitle">{displayDescription}</p>
+              ) : null}
+
+              {/* {displayExtra ? ( */}
+              {/*   <p className="cflow-ui-extra">{displayExtra}</p> */}
+              {/* ) : null} */}
+            </div>
+          </div>
+        </div>
+      </div>
+      {cover.title && (
+        <span
+          className="cflow-ui-floating-title font-lemon"
+          style={{ "--title-color": cover.color || "#111827" } as TitleStyle}
+        >
+          {cover.title}
+        </span>
+      )}{" "}
     </div>
   );
 }

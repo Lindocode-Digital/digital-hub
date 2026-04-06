@@ -19,6 +19,14 @@ const nextConfig: NextConfig = {
         source: "/projects/:path*",
         destination: "https://projects-rho-tan.vercel.app/projects/:path*",
       },
+      {
+        source: "/lazyappz",
+        destination: "https://lazy-appz.vercel.app/lazyappz",
+      },
+      {
+        source: "/lazyappz/:path*",
+        destination: "https://lazy-appz.vercel.app/lazyappz/:path*",
+      },
     ];
   },
 };

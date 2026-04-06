@@ -1,6 +1,8 @@
 {
   "name": "Lindocode Digital",
-  "short_name": "Lindocode Digital",
+  "short_name": "Lindocode",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
