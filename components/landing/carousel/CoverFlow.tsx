@@ -10,6 +10,7 @@ type CoverItem = Project & {
   image: string;
   alt?: string;
   "card-title"?: string;
+  indexLabel?: string;
 };
 
 type CoverFlowProps = {
@@ -66,6 +67,7 @@ export default function CoverFlow({ covers }: CoverFlowProps) {
             cover={cover}
             isActive={isActive}
             offset={offset}
+            indexLabel={cover.indexLabel ?? String(index + 1).padStart(2, "0")}
             onAction={() => {
               if (isActive) {
                 navigateToLink(cover.link);

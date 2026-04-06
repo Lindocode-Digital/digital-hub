@@ -182,9 +182,9 @@ export const projects: Project[] = [
     title: "Projects",
     cardTitle: "SHOWCASE",
     cardSubtitle: "Projects",
-    description: "Into the Art of Storytelling",
+    description: "Web & Mobile Apps",
     image:
-      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/lazy-appz.webp",
+      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/projects.webp",
     background: "",
     color: "",
     link: "/projects",

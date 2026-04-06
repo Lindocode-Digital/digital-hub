@@ -143,16 +143,17 @@
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.16em;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--idx-num, #ffffff);
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
 }
 
 .cflow-ui-line {
-  height: 1px;
+  height: 2px;
+  max-width: 50%;
   flex: 1;
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.55),
+    var(--idx-num, #ff0700),
     rgba(255, 255, 255, 0)
   );
 }
@@ -263,7 +264,7 @@
 .cflow-ui-title {
   margin: 0 0 6px;
   color: var(--title-color, #111827);
-  font-size: clamp(0.98rem, 1.2vw, 1.18rem);
+  font-size: clamp(0.6rem, 1.2vw, 1.18rem);
   line-height: 0.95;
   letter-spacing: -0.04em;
   font-weight: 600;

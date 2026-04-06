@@ -19,6 +19,7 @@ type CoverItem = Project & {
   description?: string;
   extra?: string;
   icons?: CoverIcon[];
+  indexLabel?: string;
 };
 
 type TitleStyle = CSSProperties & {
@@ -29,6 +30,7 @@ type CoverFlowCardProps = {
   cover: CoverItem;
   isActive: boolean;
   offset: number;
+  indexLabel?: string;
   onAction: () => void;
 };
 
@@ -36,6 +38,7 @@ export default function CoverFlowCard({
   cover,
   isActive,
   offset,
+  indexLabel,
   onAction,
 }: CoverFlowCardProps) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -91,8 +94,8 @@ export default function CoverFlowCard({
         <div className="cflow-ui-shell">
           <div className="cflow-ui-topline">
             <span className="cflow-ui-index">
-              {String(Math.abs(offset) + 1).padStart(2, "0")}
-            </span>
+              {indexLabel ?? String(Math.abs(offset) + 1).padStart(2, "0")}
+            </span>{" "}
             <div className="cflow-ui-line" />
           </div>
 
@@ -143,13 +146,14 @@ export default function CoverFlowCard({
           </div>
         </div>
       </div>
-
-      <span
-        className="cflow-ui-floating-title font-lemon"
-        style={{ "--title-color": cover.color || "#111827" } as TitleStyle}
-      >
-        {cover["card-title"] ?? cover.title}
-      </span>
+      {cover.title && (
+        <span
+          className="cflow-ui-floating-title font-lemon"
+          style={{ "--title-color": cover.color || "#111827" } as TitleStyle}
+        >
+          {cover.title}
+        </span>
+      )}{" "}
     </div>
   );
 }
