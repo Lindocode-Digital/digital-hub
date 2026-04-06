@@ -47,7 +47,7 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards.webp",
     background: "",
     color: "",
-    link: "/projects",
+    link: "/lazyappz",
     attribute: {
       artistName: "Kelly Sikkema",
       artistLink:
@@ -129,6 +129,7 @@ export const projects: Project[] = [
       og_image: "https://lindocode.com/assets/lazy-appz-preview.webp",
     },
   },
+
   {
     slug: "sdrow-vieli",
     title: "Sdrow Vieli",
@@ -140,6 +141,53 @@ export const projects: Project[] = [
     background: "",
     color: "",
     link: "",
+    attribute: {
+      artistName: "Andrew Neel",
+      artistLink:
+        "https://unsplash.com/@andrewtneel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistWorkLink:
+        "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistPlatform: "Unsplash",
+    },
+    icons: [
+      {
+        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
+        size: 24,
+        alt: "Dot",
+      },
+      {
+        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/writing-pencil-svgrepo-com-1.svg",
+        size: 35,
+        alt: "Writing icon",
+      },
+      {
+        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
+        size: 24,
+        alt: "Dot",
+      },
+    ],
+    seo: {
+      title: "Sdrow Vieli | Creative Writing",
+      description:
+        "Original fiction and thought experiments exploring human decisions, a narrative project.",
+      keywords:
+        "productivity apps, lazy appz projects, react applications, node.js tools, workflow optimization, time management apps",
+      canonical: "https://lindocode.com/lazy-appz",
+      og_image: "https://lindocode.com/assets/lazy-appz-preview.webp",
+    },
+  },
+
+  {
+    slug: "projects",
+    title: "Showcase",
+    cardTitle: "PROJECTS SHOWCASE",
+    cardSubtitle: "Explore Books",
+    description: "Into the Art of Storytelling",
+    image:
+      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/lazy-appz.webp",
+    background: "",
+    color: "",
+    link: "/projects",
     attribute: {
       artistName: "Andrew Neel",
       artistLink:

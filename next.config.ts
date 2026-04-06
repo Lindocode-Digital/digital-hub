@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/lazyappz/:path*",
-        destination: "https://projects-rho-tan.vercel.app/lazyappz/:path*",
+        destination: "https://lazy-appz.vercel.app/lazyappz/:path*",
       },
     ];
   },

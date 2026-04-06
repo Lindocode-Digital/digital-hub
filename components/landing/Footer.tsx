@@ -37,7 +37,7 @@ export default function Footer() {
             dotColor="#4b5563"
           />
         </span>
-        <span>© {year} Lindocode Digital. All rights reserved.</span>
+        <span>© {year} Lindocode Digital (Pty) Ltd. All rights reserved.</span>
       </div>
 
       <div
