@@ -46,7 +46,6 @@ export default function CoverFlowCard({
   const displayTitle = cover.cardTitle ?? cover["card-title"] ?? cover.title;
   const displaySubtitle = cover.cardSubtitle;
   const displayDescription = cover.description;
-  const displayExtra = cover.extra;
 
   return (
     <div
@@ -104,23 +103,6 @@ export default function CoverFlowCard({
               <span className="cflow-ui-chip">
                 {displaySubtitle || "View Project"}
               </span>
-
-              {/* {cover.icons?.length ? ( */}
-              {/*   <div className="cflow-ui-icons" aria-hidden="true"> */}
-              {/*     {cover.icons.slice(0, 3).map((icon, index) => ( */}
-              {/*       <img */}
-              {/*         key={`${icon.src}-${index}`} */}
-              {/*         src={icon.src} */}
-              {/*         alt={icon.alt || ""} */}
-              {/*         className="cflow-ui-icon" */}
-              {/*         style={{ */}
-              {/*           width: icon.size ? `${icon.size}px` : "16px", */}
-              {/*           height: icon.size ? `${icon.size}px` : "16px", */}
-              {/*         }} */}
-              {/*       /> */}
-              {/*     ))} */}
-              {/*   </div> */}
-              {/* ) : null} */}
             </div>
 
             <div className="cflow-ui-panel">
@@ -138,10 +120,6 @@ export default function CoverFlowCard({
               {displayDescription ? (
                 <p className="cflow-ui-subtitle">{displayDescription}</p>
               ) : null}
-
-              {/* {displayExtra ? ( */}
-              {/*   <p className="cflow-ui-extra">{displayExtra}</p> */}
-              {/* ) : null} */}
             </div>
           </div>
         </div>

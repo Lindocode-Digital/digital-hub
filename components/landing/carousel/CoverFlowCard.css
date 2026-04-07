@@ -33,9 +33,7 @@
   object-fit: cover;
   object-position: center;
   opacity: 0;
-  transition:
-    opacity 0.45s ease,
-    transform 0.8s ease;
+  transition: opacity 0.45s ease;
   z-index: 1;
   user-select: none;
   -webkit-user-drag: none;
@@ -531,5 +529,12 @@
 
   .coverflow-card-image {
     transition: none;
+  }
+}
+
+/* Disable buggy native reflection on iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .coverflow-card {
+    -webkit-box-reflect: unset !important;
   }
 }
