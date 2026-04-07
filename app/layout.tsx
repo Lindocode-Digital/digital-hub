@@ -21,42 +21,49 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://lindocode.com"),
+
   title: {
-    default: "Lindocode Digital | Web & Mobile App Development",
+    default: "Digital Hub | Lindocode Digital",
     template: "%s | Lindocode Digital",
   },
+
   description:
-    "Lindocode Digital builds modern web and mobile applications, automation systems, and API integrations for businesses and startups.",
+    "Digital Hub is a centralized, elegant platform for showcasing creative work or projects. Built to be as intuitive to navigate as it is powerful to experience.",
+
   alternates: {
-    canonical: "/",
+    canonical: "https://lindocode.com/digitalhub",
   },
+
   robots: {
     index: true,
     follow: true,
   },
+
   openGraph: {
-    title: "Lindocode Digital | Web & Mobile App Development",
+    title: "Digital Hub | Lindocode Digital",
     description:
-      "Modern web and mobile app development, automation, and API integration.",
-    url: "https://lindocode.com",
+      "Digital Hub is a centralized, elegant platform for showcasing creative work or projects. Built to be as intuitive to navigate as it is powerful to experience.",
+    url: "https://lindocode.com/digitalhub",
     siteName: "Lindocode Digital",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Lindocode Digital",
+        alt: "Digital Hub",
       },
     ],
     type: "website",
   },
+
   twitter: {
     card: "summary_large_image",
-    title: "Lindocode Digital | Web & Mobile App Development",
+    title: "Digital Hub | Lindocode Digital",
     description:
-      "Modern web and mobile app development, automation, and API integration.",
+      "Digital Hub is a centralized, elegant platform for showcasing creative work or projects. Built to be as intuitive to navigate as it is powerful to experience.",
     images: ["/og-image.png"],
   },
+
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },

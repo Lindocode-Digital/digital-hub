@@ -15,7 +15,7 @@ export default function CompanyName() {
       )}
     >
       {/* ✅ SEO + accessibility */}
-      <h1 className="sr-only">Lindocode Digital</h1>
+      <h1 className="sr-only">Digital Hub</h1>
 
       {/* ✅ Visual branding (unchanged, hidden from crawlers/screen readers) */}
       <div
