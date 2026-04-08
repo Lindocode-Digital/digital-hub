@@ -12,8 +12,6 @@ function getPose(index: number, activeIndex: number, total: number) {
   const angle = index * angleStep + currentRotation;
   const radians = (Math.PI / 180) * angle;
 
-  // Fixed baseline radius so SSR and hydration match.
-  // Let CSS/Tailwind handle responsiveness around it.
   const radius = 260;
 
   const x = radius * Math.sin(radians);
