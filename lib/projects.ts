@@ -29,8 +29,7 @@ export type Project = {
   image: string;
   background?: string;
   attribute?: ProjectAttribute;
-  icons: ProjectIcon[];
-  seo?: ProjectSeo;
+
   link?: string;
   color?: string;
 };
@@ -56,32 +55,6 @@ export const projects: Project[] = [
         "https://unsplash.com/photos/yellow-click-pen-on-white-printer-paper-gcHFXsdcmJE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistPlatform: "Unsplash",
     },
-    icons: [
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
-        size: 24,
-        alt: "Dot",
-      },
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/coding-app-svgrepo-com.svg",
-        size: 35,
-        alt: "App icon",
-      },
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
-        size: 24,
-        alt: "Dot",
-      },
-    ],
-    seo: {
-      title: "Lazy Appz | Web & mobile applications development",
-      description:
-        "Collection of minimalist web tools and productivity apps built for web and mobile apps - and production-ready utilities designed for maximum efficiency.",
-      keywords:
-        "productivity apps, lazy appz projects, react applications, node.js tools, workflow optimization, time management apps",
-      canonical: "https://lindocode.com/lazy-appz",
-      og_image: "https://lindocode.com/assets/lazy-appz-preview.webp",
-    },
   },
   {
     slug: "portfolio",
@@ -101,32 +74,6 @@ export const projects: Project[] = [
       artistWorkLink:
         "https://unsplash.com/photos/yellow-click-pen-on-white-printer-paper-gcHFXsdcmJE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistPlatform: "Unsplash",
-    },
-    icons: [
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
-        size: 24,
-        alt: "Dot",
-      },
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/coding-html-svgrepo-com-2.svg",
-        size: 35,
-        alt: "HTML icon",
-      },
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
-        size: 24,
-        alt: "Dot",
-      },
-    ],
-    seo: {
-      title: "Lindo Matabane | Full-Stack Developer",
-      description:
-        "Professional full stack developer specializing in web and mobile applications",
-      keywords:
-        "productivity apps, lazy appz projects, react applications, node.js tools, workflow optimization, time management apps",
-      canonical: "https://lindocode.com/lazy-appz",
-      og_image: "https://lindocode.com/assets/lazy-appz-preview.webp",
     },
   },
 
@@ -149,32 +96,6 @@ export const projects: Project[] = [
         "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistPlatform: "Unsplash",
     },
-    icons: [
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
-        size: 24,
-        alt: "Dot",
-      },
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/writing-pencil-svgrepo-com-1.svg",
-        size: 35,
-        alt: "Writing icon",
-      },
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
-        size: 24,
-        alt: "Dot",
-      },
-    ],
-    seo: {
-      title: "Sdrow Vieli | Creative Writing",
-      description:
-        "Original fiction and thought experiments exploring human decisions, a narrative project.",
-      keywords:
-        "productivity apps, lazy appz projects, react applications, node.js tools, workflow optimization, time management apps",
-      canonical: "https://lindocode.com/lazy-appz",
-      og_image: "https://lindocode.com/assets/lazy-appz-preview.webp",
-    },
   },
 
   {
@@ -195,32 +116,6 @@ export const projects: Project[] = [
       artistWorkLink:
         "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistPlatform: "Unsplash",
-    },
-    icons: [
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
-        size: 24,
-        alt: "Dot",
-      },
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/writing-pencil-svgrepo-com-1.svg",
-        size: 35,
-        alt: "Writing icon",
-      },
-      {
-        src: "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/icons/dot-svgrepo-com.svg",
-        size: 24,
-        alt: "Dot",
-      },
-    ],
-    seo: {
-      title: "Sdrow Vieli | Creative Writing",
-      description:
-        "Original fiction and thought experiments exploring human decisions, a narrative project.",
-      keywords:
-        "productivity apps, lazy appz projects, react applications, node.js tools, workflow optimization, time management apps",
-      canonical: "https://lindocode.com/lazy-appz",
-      og_image: "https://lindocode.com/assets/lazy-appz-preview.webp",
     },
   },
 ];
