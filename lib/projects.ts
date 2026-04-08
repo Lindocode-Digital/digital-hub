@@ -47,7 +47,7 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards.webp",
     background: "",
     color: "",
-    link: "/lazyappz",
+    link: "https://lindocode.com",
     attribute: {
       artistName: "Kelly Sikkema",
       artistLink:
@@ -187,11 +187,11 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/projects.webp",
     background: "",
     color: "",
-    link: "/projects",
+    link: "https://lindocode.com/projects",
     attribute: {
       artistName: "Andrew Neel",
       artistLink:
-        "https://unsplash.com/@andrewtneel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+        "https://unsplash.com/@andrewt neel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistWorkLink:
         "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistPlatform: "Unsplash",
