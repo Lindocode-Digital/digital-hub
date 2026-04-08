@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     siteName: "Lindocode Digital",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Digital Hub",
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     title: "Digital Hub | Lindocode Digital",
     description:
       "Digital Hub is a centralized, elegant platform for showcasing creative work or projects. Built to be as intuitive to navigate as it is powerful to experience.",
-    images: ["/og-image.png"],
+    images: ["/og-image.jpg"],
   },
 
   icons: {
