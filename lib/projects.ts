@@ -38,7 +38,7 @@ export const projects: Project[] = [
   {
     slug: "lazy-appz",
     title: "Lazy Appz",
-    cardTitle: "LAZY APPZ™",
+    cardTitle: "Lindocode Digital™",
     cardSubtitle: "Visit Us",
     description: "Tech Solutions",
     extra: "Effortless tech, maximum ease.",
