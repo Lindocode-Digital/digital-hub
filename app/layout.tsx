@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Jost, Playfair_Display, Montserrat } from "next/font/google";
 import "./globals.css";
+import TransitionProvider from "@/components/transition/TransitionProvider";
+import PageReadySignal from "@/components/PageReadySignal";
 
 const jost = Jost({
   subsets: ["latin"],
@@ -85,7 +87,10 @@ export default function RootLayout({
       <body
         className={`${jost.variable} ${playfair.variable} ${montserrat.variable} font-sans antialiased bg-white text-neutral-900 overflow-x-hidden`}
       >
-        {children}
+        <TransitionProvider>
+          {children}
+          <PageReadySignal />
+        </TransitionProvider>
       </body>
     </html>
   );
