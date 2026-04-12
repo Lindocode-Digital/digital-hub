@@ -143,7 +143,11 @@ export default function ProjectOverlay({
               )}
 
               <div className="image-data-overlay">
-                <div className="data-tag">LIVE FEED</div>
+                <div className="data-tag">
+                  {" "}
+                  <span className="dot"></span>
+                  <span style={{ color: "white" }}>LIVE FEED</span>
+                </div>
                 <div className="data-grid">
                   <span></span>
                   <span></span>
@@ -156,7 +160,13 @@ export default function ProjectOverlay({
             <div className="threat-stats">
               <div className="stat">
                 <span className="stat-label">THREAT LEVEL</span>
-                <span className="stat-value high">CRITICAL</span>
+                <span className="stat-value high">
+                  {!isStatusActive ? (
+                    <span style={{ color: "red" }}>CRITICAL</span>
+                  ) : (
+                    <span style={{ color: "limegreen" }}>NONE</span>
+                  )}
+                </span>
               </div>
               <div className="stat">
                 <span className="stat-label">PRIORITY</span>
@@ -170,7 +180,7 @@ export default function ProjectOverlay({
                   }`}
                 >
                   {isStatusActive ? (
-                    "ACTIVE"
+                    <span style={{ color: "white" }}>ACTIVE</span>
                   ) : isImageLoading && project.link ? (
                     <span className="stream-dots">●●●</span>
                   ) : (
@@ -219,7 +229,11 @@ export default function ProjectOverlay({
                   <span
                     className={`field-value ${isStatusActive ? "" : "offline"}`}
                   >
-                    {isStatusActive ? "READY FOR ACCESS" : "UNAVAILABLE"}
+                    {isStatusActive ? (
+                      <span style={{ color: "white" }}>READY FOR ACCESS</span>
+                    ) : (
+                      <span>UNAVAILABLE</span>
+                    )}
                   </span>
                 </div>
 
@@ -269,7 +283,11 @@ export default function ProjectOverlay({
                       isStatusActive ? "threat" : "offline"
                     }`}
                   >
-                    {isStatusActive ? "ACCESS READY" : "UNAVAILABLE"}
+                    {isStatusActive ? (
+                      <span style={{ color: "limegreen" }}>ACCESS READY</span>
+                    ) : (
+                      <span style={{ color: "red" }}>UNAVAILABLE</span>
+                    )}
                   </span>
                 </div>
 
