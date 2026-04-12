@@ -171,6 +171,7 @@
   border-radius: 4px;
   overflow: hidden;
   background: #000;
+  min-height: 280px;
 }
 
 .threat-image {
@@ -282,6 +283,11 @@
   text-shadow: 0 0 5px rgba(255, 68, 68, 0.5);
 }
 
+.stat-value.offline {
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
 .blinking {
   animation: blinkText 1s infinite;
 }
@@ -359,6 +365,11 @@
   color: #0ff;
 }
 
+.field-value.offline {
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
 .flags-list {
   display: flex;
   flex-wrap: wrap;
@@ -417,6 +428,11 @@
 .conclusion-value.track {
   color: #ffaa44;
   text-shadow: 0 0 5px rgba(255, 170, 68, 0.5);
+}
+
+.conclusion-value.offline {
+  color: rgba(255, 255, 255, 0.72);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.08);
 }
 
 .overlay-action-row {
@@ -539,6 +555,8 @@
   font-size: 11px;
   letter-spacing: 2px;
   z-index: 5;
+  text-align: center;
+  padding: 20px;
 }
 
 .loading-spinner {
