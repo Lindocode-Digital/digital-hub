@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/lib/projects";
 import "./ProjectOverlay.css";
@@ -42,6 +42,17 @@ export default function ProjectOverlay({
   const [openSection, setOpenSection] = useState<SectionKey>("overview");
   const [isValidating, setIsValidating] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setIsNavigating(false);
+      return;
+    }
+
+    if (project) {
+      setIsNavigating(false);
+    }
+  }, [isOpen, project?.link, project]);
 
   useEffect(() => {
     if (isOpen && project) {
@@ -106,7 +117,7 @@ export default function ProjectOverlay({
       setValidation(null);
       setImageError(false);
       setIsImageLoading(false);
-      console.log(project.link);
+
       try {
         const response = await fetch(
           `${VALIDATION_ENDPOINT}/?action=validate&url=${encodeURIComponent(project.link ?? "")}`,
@@ -144,12 +155,17 @@ export default function ProjectOverlay({
   }, [isOpen, project?.link]);
 
   const handleNavigate = () => {
-    if (!project?.link || isNavigating) return;
-
-    setIsNavigating(true);
+    if (!project?.link || isNavigating || isValidating) return;
 
     if (project.link.startsWith("/")) {
-      router.push(project.link);
+      flushSync(() => {
+        setIsNavigating(true);
+      });
+
+      requestAnimationFrame(() => {
+        router.push(project.link ?? "");
+      });
+
       return;
     }
 
@@ -438,10 +454,15 @@ export default function ProjectOverlay({
                   previewState !== "ready" ? "is-warning" : ""
                 }`}
                 onClick={handleNavigate}
-                disabled={isNavigating}
+                disabled={isNavigating || isValidating}
                 type="button"
               >
-                {isNavigating ? (
+                {isValidating ? (
+                  <>
+                    <span>VALIDATING...</span>
+                    <span className="stream-dots">●●●</span>
+                  </>
+                ) : isNavigating ? (
                   <>
                     <span>REDIRECTING</span>
                     <span className="stream-dots">●●●</span>
