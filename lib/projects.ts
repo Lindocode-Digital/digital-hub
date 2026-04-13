@@ -90,7 +90,7 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards6.webp",
     background: "",
     color: "",
-    link: "https://lindocode.com/sdrowvieli",
+    link: "https://sdrowvieli.lindocode.com",
     attribute: {
       artistName: "Andrew Neel",
       artistLink:
