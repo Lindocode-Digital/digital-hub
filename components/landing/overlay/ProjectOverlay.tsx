@@ -16,23 +16,41 @@ type SectionKey = "overview" | "diagnostics" | "recommendation";
 
 type PreviewState = "loading" | "ready" | "broken" | "missing";
 
+type ValidationResult = {
+  ok: boolean;
+  isWorking?: boolean;
+  isReachable?: boolean;
+  statusCode?: number;
+  statusText?: string;
+  finalUrl?: string;
+  contentType?: string | null;
+  error?: string;
+  link?: string;
+};
+
+const VALIDATION_ENDPOINT = "https://dawn-violet-bb5b.sdrowvieli1.workers.dev";
+
 export default function ProjectOverlay({
   project,
   isOpen,
   onClose,
 }: ProjectOverlayProps) {
   const router = useRouter();
-  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [openSection, setOpenSection] = useState<SectionKey>("overview");
+  const [isValidating, setIsValidating] = useState(false);
+  const [validation, setValidation] = useState<ValidationResult | null>(null);
 
   useEffect(() => {
     if (isOpen && project) {
-      setIsImageLoading(Boolean(project.link));
+      setIsImageLoading(false);
       setImageError(false);
       setIsNavigating(false);
       setOpenSection("overview");
+      setValidation(null);
+      setIsValidating(Boolean(project.link));
     }
   }, [isOpen, project]);
 
@@ -75,6 +93,56 @@ export default function ProjectOverlay({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || !project?.link) {
+      setIsValidating(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const runValidation = async () => {
+      setIsValidating(true);
+      setValidation(null);
+      setImageError(false);
+      setIsImageLoading(false);
+      console.log(project.link);
+      try {
+        const response = await fetch(
+          `${VALIDATION_ENDPOINT}/?action=validate&url=${encodeURIComponent(project.link ?? "")}`,
+        );
+
+        const data: ValidationResult = await response.json();
+
+        if (cancelled) return;
+
+        setValidation(data);
+
+        if (data.isWorking) {
+          setIsImageLoading(true);
+        }
+      } catch (error) {
+        if (cancelled) return;
+
+        setValidation({
+          ok: false,
+          isWorking: false,
+          error: error instanceof Error ? error.message : "Validation failed",
+        });
+      } finally {
+        if (!cancelled) {
+          setIsValidating(false);
+        }
+      }
+    };
+
+    runValidation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, project?.link]);
+
   const handleNavigate = () => {
     if (!project?.link || isNavigating) return;
 
@@ -99,17 +167,23 @@ export default function ProjectOverlay({
     )}&screenshot=true&embed=screenshot.url`;
   }, [project?.link]);
 
-  const previewState: PreviewState = !project?.link
+  const hasLink = Boolean(project?.link);
+  const isLinkWorking = Boolean(validation?.isWorking);
+
+  const previewState: PreviewState = !hasLink
     ? "missing"
-    : isImageLoading
+    : isValidating
       ? "loading"
-      : imageError
+      : !isLinkWorking
         ? "broken"
-        : "ready";
+        : isImageLoading
+          ? "loading"
+          : imageError
+            ? "broken"
+            : "ready";
 
   const isStatusActive = previewState === "ready";
   const isBrokenState = previewState === "broken";
-  const hasLink = Boolean(project?.link);
 
   const projectCode =
     project?.slug && project?.domain
@@ -172,7 +246,9 @@ export default function ProjectOverlay({
             ]
           : [
               "PREVIEW CAPTURE FAILED",
-              "POSSIBLE 404 OR DEAD ROUTE",
+              validation?.statusCode
+                ? `REMOTE RESPONSE ${validation.statusCode}`
+                : "POSSIBLE 404 OR DEAD ROUTE",
               "REMOTE TARGET NOT VERIFIED",
               "MANUAL CHECK RECOMMENDED",
             ];
@@ -188,7 +264,9 @@ export default function ProjectOverlay({
     previewState === "missing"
       ? "LINK NOT PROVIDED"
       : previewState === "broken"
-        ? "Possible 404, bad route, blocked page, or unavailable screenshot source."
+        ? validation?.finalUrl ||
+          validation?.error ||
+          "Possible 404, bad route, blocked page, or unavailable screenshot source."
         : project?.link || "NO LINK AVAILABLE";
 
   if (!isOpen || !project) return null;
@@ -265,7 +343,7 @@ export default function ProjectOverlay({
                 </div>
               )}
 
-              {hasLink && (
+              {hasLink && isLinkWorking && (
                 <img
                   src={screenshotUrl}
                   alt={project.title}
@@ -395,7 +473,7 @@ export default function ProjectOverlay({
                     ? "Preview capture is still syncing. Route validation is in progress and access status is being checked."
                     : previewState === "missing"
                       ? "This project does not currently include a live link, so preview and direct access cannot be verified."
-                      : "The preview could not be loaded. This usually means the route is invalid, the page returns 404, the host is unavailable, or the screenshot source could not access the page."}
+                      : "The target route failed validation. This usually means the route is invalid, the page returns 404, the host is unavailable, or the remote page is blocking access."}
               </p>
             </div>
 
@@ -446,7 +524,9 @@ export default function ProjectOverlay({
                     <div className="data-field">
                       <span className="field-label">LINK</span>
                       <span className="field-value mono">
-                        {project.link || "NO LINK AVAILABLE"}
+                        {validation?.finalUrl ||
+                          project.link ||
+                          "NO LINK AVAILABLE"}
                       </span>
                     </div>
                   </div>
