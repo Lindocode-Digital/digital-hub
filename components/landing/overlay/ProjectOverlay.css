@@ -17,8 +17,8 @@
   inset: 0;
   background:
     radial-gradient(circle at top, rgba(201, 9, 7, 0.1), transparent 40%),
-    rgba(3, 5, 10, 0.78);
-  backdrop-filter: blur(10px);
+    rgba(3, 5, 10, 0.75);
+  backdrop-filter: blur(0px);
 }
 
 .threat-overlay-panel {
