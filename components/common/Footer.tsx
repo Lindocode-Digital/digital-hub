@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Github, Linkedin } from "lucide-react";
-import Logo from "./Logo";
+import Logo from "./logo/Logo";
 
 export default function Footer() {
   const year = new Date().getFullYear();

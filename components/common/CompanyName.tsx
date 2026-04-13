@@ -1,6 +1,6 @@
-import "./Logo.css";
+import "./logo/Logo.css";
 import clsx from "clsx";
-import Logo from "./Logo";
+import Logo from "./logo/Logo";
 
 export default function CompanyName() {
   const word = "LINDOCODE";

@@ -1,6 +1,6 @@
-import CompanyName from "./CompanyName";
-import Banner from "./Banner";
-import Footer from "./Footer";
+import CompanyName from "@/components/common/CompanyName";
+import Banner from "@/components/common/Banner";
+import Footer from "@/components/common/Footer";
 import CarouselShell from "./carousel/CarouselShell";
 import { projects } from "@/lib/projects";
 
