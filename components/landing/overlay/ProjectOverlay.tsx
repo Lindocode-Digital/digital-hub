@@ -99,8 +99,8 @@ export default function ProjectOverlay({
 
   const isStatusActive = !isImageLoading && !imageError;
   const projectCode = project?.slug
-    ? `PROJECT://${project.slug.toUpperCase()}`
-    : "PROJECT://UNKNOWN";
+    ? `PROJECT LINK: ${project.domain?.toUpperCase()}${project.slug.toUpperCase()}`
+    : "PROJECT LINK: UNKNOWN";
 
   const statusLabel = isStatusActive
     ? "READY FOR ACCESS"
@@ -227,21 +227,23 @@ export default function ProjectOverlay({
               </div>
             </div>
 
-            <button
-              className="threat-enter-link"
-              onClick={handleNavigate}
-              disabled={!project.link || isNavigating}
-              type="button"
-            >
-              {isNavigating ? (
-                <>
-                  <span>REDIRECTING</span>
-                  <span className="stream-dots">●●●</span>
-                </>
-              ) : (
-                "ENTER PROJECT"
-              )}
-            </button>
+            {isStatusActive && (
+              <button
+                className="threat-enter-link"
+                onClick={handleNavigate}
+                disabled={!project.link || isNavigating}
+                type="button"
+              >
+                {isNavigating ? (
+                  <>
+                    <span>REDIRECTING</span>
+                    <span className="stream-dots">●●●</span>
+                  </>
+                ) : (
+                  "OPEN PROJECT"
+                )}
+              </button>
+            )}
           </div>
 
           <div className="threat-data-panel">

@@ -29,15 +29,16 @@ export type Project = {
   image: string;
   background?: string;
   attribute?: ProjectAttribute;
-
+  domain?: string;
   link?: string;
   color?: string;
 };
 
 export const projects: Project[] = [
   {
-    slug: "lazy-appz",
-    title: "Lazy Appz",
+    slug: "/",
+    domain: "lindocode.com",
+    title: "Lindocode Digital",
     cardTitle: "Lindocode Digital™",
     cardSubtitle: "Visit Us",
     description: "Tech Solutions",
@@ -57,7 +58,8 @@ export const projects: Project[] = [
     },
   },
   {
-    slug: "portfolio",
+    slug: "/portfolio",
+    domain: "lindocode.com",
     title: "PORTFOLIO",
     cardTitle: "PORTFOLIO",
     cardSubtitle: "Fullstack",
@@ -78,7 +80,8 @@ export const projects: Project[] = [
   },
 
   {
-    slug: "sdrow-vieli",
+    slug: "/sdrow-vieli",
+    domain: "lindocode.com",
     title: "Sdrow Vieli",
     cardTitle: "SDROW VIELI",
     cardSubtitle: "Writing",
@@ -99,7 +102,8 @@ export const projects: Project[] = [
   },
 
   {
-    slug: "projects",
+    slug: "/projects",
+    domain: "lindocode.com",
     title: "Projects",
     cardTitle: "SHOWCASE",
     cardSubtitle: "Projects",
