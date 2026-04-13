@@ -129,9 +129,9 @@
 }
 
 .threat-close {
-  background: rgba(255, 0, 0, 0.2);
-  border: 1px solid rgba(255, 0, 0, 0.4);
-  color: #f00;
+  background: transparent;
+  border: 1px solid transparent;
+  color: transparent;
   width: 32px;
   height: 32px;
   border-radius: 4px;
@@ -141,8 +141,8 @@
 }
 
 .threat-close:hover {
-  background: rgba(255, 0, 0, 0.4);
-  border-color: #f00;
+  background: transparent;
+  border-color: transparent;
   transform: scale(1.05);
 }
 

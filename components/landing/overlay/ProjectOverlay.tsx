@@ -98,8 +98,9 @@ export default function ProjectOverlay({
             onClick={onClose}
             disabled={isNavigating}
             aria-label="Close overlay"
+            style={{ color: "green" }}
           >
-            ✕
+            🔘{" "}
           </button>
         </div>
 
@@ -214,7 +215,9 @@ export default function ProjectOverlay({
           <div className="threat-data-panel">
             <div className="data-section">
               <div className="section-header">
-                <span className="section-icon">▶</span>
+                <span className="section-icon" style={{ color: "orange" }}>
+                  ◆
+                </span>
                 <span className="section-title">SUBJECT IDENTIFICATION</span>
               </div>
 
@@ -255,7 +258,10 @@ export default function ProjectOverlay({
 
             <div className="data-section">
               <div className="section-header">
-                <span className="section-icon">⚠</span>
+                <span className="section-icon" style={{ color: "yellow" }}>
+                  ◆
+                </span>
+
                 <span className="section-title">DIAGNOSTIC FLAGS</span>
               </div>
 
