@@ -58,8 +58,8 @@ export const projects: Project[] = [
     },
   },
   {
-    slug: "/portfolio",
-    domain: "lindocode.com",
+    slug: "/",
+    domain: "portfolio.lindocode.com",
     title: "PORTFOLIO",
     cardTitle: "PORTFOLIO",
     cardSubtitle: "Fullstack",
@@ -80,8 +80,8 @@ export const projects: Project[] = [
   },
 
   {
-    slug: "/sdrow-vieli",
-    domain: "lindocode.com",
+    slug: "/",
+    domain: "sdrowvieli.lindocode.com",
     title: "Sdrow Vieli",
     cardTitle: "SDROW VIELI",
     cardSubtitle: "Writing",
