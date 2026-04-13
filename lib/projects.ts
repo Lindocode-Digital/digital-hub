@@ -29,16 +29,17 @@ export type Project = {
   image: string;
   background?: string;
   attribute?: ProjectAttribute;
-
+  domain?: string;
   link?: string;
   color?: string;
 };
 
 export const projects: Project[] = [
   {
-    slug: "lazy-appz",
-    title: "Lazy Appz",
-    cardTitle: "LAZY APPZ™",
+    slug: "/",
+    domain: "lindocode.com",
+    title: "Lindocode Digital",
+    cardTitle: "Lindocode Digital™",
     cardSubtitle: "Visit Us",
     description: "Tech Solutions",
     extra: "Effortless tech, maximum ease.",
@@ -57,7 +58,8 @@ export const projects: Project[] = [
     },
   },
   {
-    slug: "portfolio",
+    slug: "/portfolio",
+    domain: "lindocode.com",
     title: "PORTFOLIO",
     cardTitle: "PORTFOLIO",
     cardSubtitle: "Fullstack",
@@ -66,7 +68,7 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards7.webp",
     background: "",
     color: "",
-    link: "/",
+    link: "",
     attribute: {
       artistName: "Kelly Sikkema",
       artistLink:
@@ -78,7 +80,8 @@ export const projects: Project[] = [
   },
 
   {
-    slug: "sdrow-vieli",
+    slug: "/sdrow-vieli",
+    domain: "lindocode.com",
     title: "Sdrow Vieli",
     cardTitle: "SDROW VIELI",
     cardSubtitle: "Writing",
@@ -87,7 +90,7 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards6.webp",
     background: "",
     color: "",
-    link: "",
+    link: "https://sdrowvieli.lindocode.com",
     attribute: {
       artistName: "Andrew Neel",
       artistLink:
@@ -99,8 +102,9 @@ export const projects: Project[] = [
   },
 
   {
-    slug: "projects",
-    title: "Projects",
+    slug: "/projects",
+    domain: "lindocode.com",
+    title: "Featured Projects",
     cardTitle: "SHOWCASE",
     cardSubtitle: "Projects",
     description: "Web & Mobile Apps",
