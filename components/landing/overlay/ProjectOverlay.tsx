@@ -163,7 +163,7 @@ export default function ProjectOverlay({
       });
 
       requestAnimationFrame(() => {
-        router.push(project.link);
+        router.push(project.link ?? "");
       });
 
       return;
