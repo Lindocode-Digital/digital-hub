@@ -14,6 +14,8 @@ type ProjectOverlayProps = {
 
 type SectionKey = "overview" | "diagnostics" | "recommendation";
 
+type PreviewState = "loading" | "ready" | "broken" | "missing";
+
 export default function ProjectOverlay({
   project,
   isOpen,
@@ -27,7 +29,7 @@ export default function ProjectOverlay({
 
   useEffect(() => {
     if (isOpen && project) {
-      setIsImageLoading(true);
+      setIsImageLoading(Boolean(project.link));
       setImageError(false);
       setIsNavigating(false);
       setOpenSection("overview");
@@ -87,7 +89,7 @@ export default function ProjectOverlay({
   };
 
   const toggleSection = (section: SectionKey) => {
-    setOpenSection((prev) => (prev === section ? section : section));
+    setOpenSection((prev) => (prev === section ? prev : section));
   };
 
   const screenshotUrl = useMemo(() => {
@@ -97,18 +99,97 @@ export default function ProjectOverlay({
     )}&screenshot=true&embed=screenshot.url`;
   }, [project?.link]);
 
-  const isStatusActive = !isImageLoading && !imageError;
-  const projectCode = project?.slug
-    ? `PROJECT LINK: ${project.domain?.toUpperCase()}${project.slug.toUpperCase()}`
-    : "PROJECT LINK: UNKNOWN";
+  const previewState: PreviewState = !project?.link
+    ? "missing"
+    : isImageLoading
+      ? "loading"
+      : imageError
+        ? "broken"
+        : "ready";
 
-  const statusLabel = isStatusActive
-    ? "READY FOR ACCESS"
-    : isImageLoading && project?.link
-      ? "SYNCING PREVIEW"
-      : "UNAVAILABLE";
+  const isStatusActive = previewState === "ready";
+  const isBrokenState = previewState === "broken";
+  const hasLink = Boolean(project?.link);
 
-  const recommendation = isStatusActive ? "ENTER PROJECT" : "CHECK BACK LATER";
+  const projectCode =
+    project?.slug && project?.domain
+      ? `PROJECT LINK: ${project.domain.toUpperCase()}${project.slug.toUpperCase()}`
+      : project?.slug
+        ? `PROJECT://${project.slug.toUpperCase()}`
+        : "PROJECT://UNKNOWN";
+
+  const statusLabel =
+    previewState === "ready"
+      ? "READY FOR ACCESS"
+      : previewState === "loading"
+        ? "SYNCING PREVIEW"
+        : previewState === "missing"
+          ? "NO LINK PROVIDED"
+          : "PAGE UNAVAILABLE";
+
+  const accessLabel =
+    previewState === "ready"
+      ? "OPEN"
+      : previewState === "loading"
+        ? "CHECKING"
+        : "DOWN";
+
+  const feedLabel =
+    previewState === "ready"
+      ? "ACTIVE"
+      : previewState === "loading"
+        ? "SYNCING"
+        : "OFFLINE";
+
+  const recommendation =
+    previewState === "ready"
+      ? "OPEN PROJECT"
+      : previewState === "missing"
+        ? "ADD A VALID LINK"
+        : "VERIFY ROUTE OR PAGE";
+
+  const diagnosticFlags =
+    previewState === "ready"
+      ? [
+          "LIVE PREVIEW AVAILABLE",
+          "SECURE SESSION HANDOFF",
+          "REMOTE TARGET VERIFIED",
+          "INTERCEPT LAYER ACTIVE",
+        ]
+      : previewState === "loading"
+        ? [
+            "PREVIEW REQUEST QUEUED",
+            "ROUTE VALIDATION PENDING",
+            "REMOTE STATUS UNKNOWN",
+            "SESSION CHECK ACTIVE",
+          ]
+        : previewState === "missing"
+          ? [
+              "NO TARGET LINK PROVIDED",
+              "PREVIEW CAPTURE DISABLED",
+              "MANUAL ROUTE REQUIRED",
+              "PROJECT RECORD INCOMPLETE",
+            ]
+          : [
+              "PREVIEW CAPTURE FAILED",
+              "POSSIBLE 404 OR DEAD ROUTE",
+              "REMOTE TARGET NOT VERIFIED",
+              "MANUAL CHECK RECOMMENDED",
+            ];
+
+  const errorTitle =
+    previewState === "missing"
+      ? "NO LIVE PREVIEW"
+      : previewState === "broken"
+        ? "PAGE NOT FOUND OR UNREACHABLE"
+        : "CAPTURING LIVE PREVIEW";
+
+  const errorSubtitle =
+    previewState === "missing"
+      ? "LINK NOT PROVIDED"
+      : previewState === "broken"
+        ? "Possible 404, bad route, blocked page, or unavailable screenshot source."
+        : project?.link || "NO LINK AVAILABLE";
 
   if (!isOpen || !project) return null;
 
@@ -152,58 +233,92 @@ export default function ProjectOverlay({
 
         <div className="threat-content">
           <div className="threat-image-panel">
-            <div className="image-container">
-              {(isImageLoading || imageError) && (
-                <div className="screenshot-loading">
-                  <div className="loading-spinner" />{" "}
-                  <span>
-                    {imageError
-                      ? "PREVIEW CAPTURE FAILED"
-                      : "CAPTURING LIVE PREVIEW"}
-                  </span>
-                  <span className="loading-url">
-                    {project.link || "NO LINK AVAILABLE"}
-                  </span>
+            <div
+              className={`image-container ${
+                isBrokenState ? "is-broken-preview" : ""
+              } ${previewState === "missing" ? "is-missing-preview" : ""}`}
+            >
+              {(previewState === "loading" ||
+                previewState === "broken" ||
+                previewState === "missing") && (
+                <div
+                  className={`screenshot-loading ${
+                    previewState !== "loading" ? "is-error" : ""
+                  }`}
+                >
+                  <div className="preview-status-badge">
+                    {previewState === "loading"
+                      ? "LIVE FEED"
+                      : previewState === "broken"
+                        ? "LINK ALERT"
+                        : "MISSING LINK"}
+                  </div>
+
+                  {previewState === "loading" ? (
+                    <div className="loading-spinner" />
+                  ) : (
+                    <div className="error-icon">!</div>
+                  )}
+
+                  <span>{errorTitle}</span>
+                  <span className="loading-url">{errorSubtitle}</span>
                 </div>
               )}
 
-              {project.link ? (
+              {hasLink && (
                 <img
                   src={screenshotUrl}
                   alt={project.title}
                   className="threat-image"
                   style={{
-                    display: isImageLoading || imageError ? "none" : "block",
+                    display: previewState === "ready" ? "block" : "none",
                   }}
-                  onLoad={() => setIsImageLoading(false)}
+                  onLoad={() => {
+                    setIsImageLoading(false);
+                    setImageError(false);
+                  }}
                   onError={() => {
                     setImageError(true);
                     setIsImageLoading(false);
                   }}
                 />
-              ) : (
-                <div className="screenshot-loading">
-                  <div className="data-tag">
-                    <span className="dot" style={{ backgroundColor: "red" }} />
-                    <span>LIVE FEED</span>
-                  </div>
-
-                  <div className="loading-spinner" />
-
-                  <span>NO LIVE PREVIEW</span>
-                  <span className="loading-url">LINK NOT PROVIDED</span>
-                </div>
               )}
 
               <div className="image-data-overlay">
-                <div className="data-tag">
-                  <span className="dot" />
-                  <span>LIVE FEED</span>
+                <div
+                  className={`data-tag ${
+                    previewState !== "ready" ? "data-tag-alert" : ""
+                  }`}
+                >
+                  <span
+                    className="dot"
+                    style={
+                      previewState === "ready"
+                        ? undefined
+                        : {
+                            background: "#ff7b72",
+                            boxShadow: "0 0 10px rgba(255, 123, 114, 0.5)",
+                          }
+                    }
+                  />
+                  <span>
+                    {previewState === "ready"
+                      ? "LIVE FEED"
+                      : previewState === "loading"
+                        ? "CHECKING"
+                        : "ALERT"}
+                  </span>
                 </div>
 
                 <div className="image-caption">
                   <span className="image-caption-label">STATUS</span>
-                  <span className="image-caption-value">{statusLabel}</span>
+                  <span
+                    className={`image-caption-value ${
+                      previewState !== "ready" ? "caption-alert" : ""
+                    }`}
+                  >
+                    {statusLabel}
+                  </span>
                 </div>
               </div>
             </div>
@@ -212,32 +327,40 @@ export default function ProjectOverlay({
               <div className="stat-card">
                 <span className="stat-label">ACCESS</span>
                 <span
-                  className={`stat-value ${isStatusActive ? "online" : "offline"}`}
+                  className={`stat-value ${
+                    isStatusActive ? "online" : "offline"
+                  }`}
                 >
-                  {isStatusActive ? "OPEN" : "DOWN"}
+                  {accessLabel}
                 </span>
               </div>
 
               <div className="stat-card">
                 <span className="stat-label">PRIORITY</span>
-                <span className="stat-value">ALPHA</span>
+                <span className="stat-value">
+                  {previewState === "ready" ? "ALPHA" : "REVIEW"}
+                </span>
               </div>
 
               <div className="stat-card">
                 <span className="stat-label">FEED</span>
                 <span
-                  className={`stat-value ${isStatusActive ? "online" : "offline"}`}
+                  className={`stat-value ${
+                    isStatusActive ? "online" : "offline"
+                  }`}
                 >
-                  {isStatusActive ? "ACTIVE" : "OFFLINE"}
+                  {feedLabel}
                 </span>
               </div>
             </div>
 
-            {isStatusActive && (
+            {hasLink ? (
               <button
-                className="threat-enter-link"
+                className={`threat-enter-link ${
+                  previewState !== "ready" ? "is-warning" : ""
+                }`}
                 onClick={handleNavigate}
-                disabled={!project.link || isNavigating}
+                disabled={isNavigating}
                 type="button"
               >
                 {isNavigating ? (
@@ -245,9 +368,19 @@ export default function ProjectOverlay({
                     <span>REDIRECTING</span>
                     <span className="stream-dots">●●●</span>
                   </>
-                ) : (
+                ) : previewState === "ready" ? (
                   "OPEN PROJECT"
+                ) : (
+                  "OPEN ANYWAY"
                 )}
+              </button>
+            ) : (
+              <button
+                className="threat-enter-link is-disabled-look"
+                disabled
+                type="button"
+              >
+                LINK REQUIRED
               </button>
             )}
           </div>
@@ -256,9 +389,13 @@ export default function ProjectOverlay({
             <div className="hero-summary">
               <span className="hero-summary-kicker">MISSION SUMMARY</span>
               <p className="hero-summary-text">
-                Secure project preview channel established. Review target
-                status, live route availability, and access readiness before
-                deployment.
+                {previewState === "ready"
+                  ? "Secure project preview channel established. Review target status, live route availability, and access readiness before deployment."
+                  : previewState === "loading"
+                    ? "Preview capture is still syncing. Route validation is in progress and access status is being checked."
+                    : previewState === "missing"
+                      ? "This project does not currently include a live link, so preview and direct access cannot be verified."
+                      : "The preview could not be loaded. This usually means the route is invalid, the page returns 404, the host is unavailable, or the screenshot source could not access the page."}
               </p>
             </div>
 
@@ -338,10 +475,11 @@ export default function ProjectOverlay({
               {openSection === "diagnostics" && (
                 <div className="section-body">
                   <div className="flags-list">
-                    <span className="flag">LIVE PREVIEW AVAILABLE</span>
-                    <span className="flag">SECURE SESSION HANDOFF</span>
-                    <span className="flag">REMOTE TARGET VERIFIED</span>
-                    <span className="flag">INTERCEPT LAYER ACTIVE</span>
+                    {diagnosticFlags.map((flag) => (
+                      <span className="flag" key={flag}>
+                        {flag}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
@@ -375,7 +513,13 @@ export default function ProjectOverlay({
                           isStatusActive ? "ready" : "offline"
                         }`}
                       >
-                        {isStatusActive ? "ACCESS READY" : "UNAVAILABLE"}
+                        {previewState === "ready"
+                          ? "ACCESS READY"
+                          : previewState === "loading"
+                            ? "VALIDATING"
+                            : previewState === "missing"
+                              ? "LINK MISSING"
+                              : "PAGE UNAVAILABLE"}
                       </span>
                     </div>
 
@@ -395,7 +539,13 @@ export default function ProjectOverlay({
             </div>
 
             <div className="data-stream">
-              <span className="stream-text">DATA_ACQUISITION_ACTIVE</span>
+              <span className="stream-text">
+                {previewState === "ready"
+                  ? "DATA_ACQUISITION_ACTIVE"
+                  : previewState === "loading"
+                    ? "TARGET_VALIDATION_RUNNING"
+                    : "TARGET_VALIDATION_FAILED"}
+              </span>
               <span className="stream-dots">●●●</span>
             </div>
           </div>
@@ -403,8 +553,24 @@ export default function ProjectOverlay({
 
         <div className="threat-footer">
           <div className="footer-left">
-            <span className="dot" />
-            <span>SECURE LINK ESTABLISHED</span>
+            <span
+              className="dot"
+              style={
+                previewState === "ready"
+                  ? undefined
+                  : {
+                      background: "#ff7b72",
+                      boxShadow: "0 0 10px rgba(255, 123, 114, 0.5)",
+                    }
+              }
+            />
+            <span>
+              {previewState === "ready"
+                ? "SECURE LINK ESTABLISHED"
+                : previewState === "loading"
+                  ? "SECURE LINK CHECK IN PROGRESS"
+                  : "LINK VERIFICATION FAILED"}
+            </span>
           </div>
 
           <div className="footer-right">
