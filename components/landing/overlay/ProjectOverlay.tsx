@@ -155,7 +155,7 @@ export default function ProjectOverlay({
             <div className="image-container">
               {(isImageLoading || imageError) && (
                 <div className="screenshot-loading">
-                  <div className="loading-spinner" />
+                  <div className="loading-spinner" />{" "}
                   <span>
                     {imageError
                       ? "PREVIEW CAPTURE FAILED"
@@ -183,7 +183,13 @@ export default function ProjectOverlay({
                 />
               ) : (
                 <div className="screenshot-loading">
+                  <div className="data-tag">
+                    <span className="dot" style={{ backgroundColor: "red" }} />
+                    <span>LIVE FEED</span>
+                  </div>
+
                   <div className="loading-spinner" />
+
                   <span>NO LIVE PREVIEW</span>
                   <span className="loading-url">LINK NOT PROVIDED</span>
                 </div>

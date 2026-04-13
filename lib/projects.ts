@@ -90,7 +90,7 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards6.webp",
     background: "",
     color: "",
-    link: "",
+    link: "https://lindocode.com/sdrowvieli",
     attribute: {
       artistName: "Andrew Neel",
       artistLink:
@@ -104,7 +104,7 @@ export const projects: Project[] = [
   {
     slug: "/projects",
     domain: "lindocode.com",
-    title: "Projects",
+    title: "Featured Projects",
     cardTitle: "SHOWCASE",
     cardSubtitle: "Projects",
     description: "Web & Mobile Apps",
