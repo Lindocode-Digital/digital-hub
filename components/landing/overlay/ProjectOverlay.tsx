@@ -197,7 +197,7 @@ export default function ProjectOverlay({
 
     // For external links, use setTimeout to ensure UI updates
     setTimeout(() => {
-      window.location.assign(project.link);
+      window.location.assign(project.link ?? "");
     }, 50);
   };
 
