@@ -52,13 +52,13 @@ export default function CompanyName() {
 
       <p
         className={clsx(
-          "company-name-digital font-normal tracking-[0.18em] text-red-600",
+          "company-name-digital font-normal tracking-[0.18em]",
           "text-[0.95rem] min-[421px]:text-[1.1rem] sm:text-[1.2rem] md:text-[1.8rem]",
           "landscape:md:self-baseline",
         )}
       >
-        Hub
-        <span className={clsx("text-black text-[0.5em]")}>™</span>{" "}
+        <span className="text-red-600">Hub</span>
+        <span className="text-black text-[0.6em] align-super">™</span>
       </p>
     </header>
   );
