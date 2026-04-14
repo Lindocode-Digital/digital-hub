@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { createPortal, flushSync } from "react-dom";
+import { useEffect, useMemo, useState, startTransition } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/lib/projects";
 import "./ProjectOverlay.css";
@@ -62,6 +62,7 @@ export default function ProjectOverlay({
     }
   }, [isOpen, animationState, onClose]);
 
+  // Reset navigating state when project changes or overlay closes
   useEffect(() => {
     if (!isOpen) {
       setIsNavigating(false);
@@ -71,8 +72,9 @@ export default function ProjectOverlay({
     if (project) {
       setIsNavigating(false);
     }
-  }, [isOpen, project?.link, project]);
+  }, [isOpen, project]);
 
+  // Reset states when overlay opens with new project
   useEffect(() => {
     if (isOpen && project) {
       setIsImageLoading(false);
@@ -84,6 +86,7 @@ export default function ProjectOverlay({
     }
   }, [isOpen, project]);
 
+  // Prevent body scroll when overlay is open
   useEffect(() => {
     if (!isOpen) return;
 
@@ -95,6 +98,7 @@ export default function ProjectOverlay({
     };
   }, [isOpen]);
 
+  // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (
@@ -111,6 +115,7 @@ export default function ProjectOverlay({
     return () => window.removeEventListener("keydown", handleEscape);
   }, [isOpen, isNavigating, onClose, animationState]);
 
+  // Handle touch move to prevent background scroll
   useEffect(() => {
     if (!isOpen) return;
 
@@ -128,6 +133,7 @@ export default function ProjectOverlay({
     };
   }, [isOpen]);
 
+  // Validate project link
   useEffect(() => {
     if (!isOpen || !project?.link) {
       setIsValidating(false);
@@ -178,29 +184,26 @@ export default function ProjectOverlay({
     };
   }, [isOpen, project?.link]);
 
-  const handleNavigate = async () => {
+  // Handle navigation - FIXED: No flushSync to prevent back-button freeze
+  const handleNavigate = () => {
     if (!project?.link || isNavigating || isValidating) return;
 
-    // Set navigating state first
-    setIsNavigating(true);
+    const link = project.link;
 
-    // Small delay to ensure the UI updates
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    // Use startTransition for smoother state update
+    startTransition(() => {
+      setIsNavigating(true);
+    });
 
-    if (project.link.startsWith("/")) {
-      // Use setTimeout to ensure the navigation happens after the UI update
-      setTimeout(() => {
-        router.push(project.link ?? "");
-      }, 50);
-      return;
-    }
-
-    // For external links, use setTimeout to ensure UI updates
+    // Small delay to ensure UI updates before navigation
     setTimeout(() => {
-      window.location.assign(project.link ?? "");
+      if (link.startsWith("/")) {
+        router.push(link);
+      } else {
+        window.location.assign(link);
+      }
     }, 50);
   };
-
   const toggleSection = (section: SectionKey) => {
     setOpenSection((prev) => (prev === section ? prev : section));
   };
