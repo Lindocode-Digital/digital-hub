@@ -42,6 +42,25 @@ export default function ProjectOverlay({
   const [openSection, setOpenSection] = useState<SectionKey>("overview");
   const [isValidating, setIsValidating] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
+  const [animationState, setAnimationState] = useState<
+    "closed" | "open" | "closing"
+  >("closed");
+
+  // Handle animation states when isOpen changes
+  useEffect(() => {
+    if (isOpen && animationState === "closed") {
+      requestAnimationFrame(() => {
+        setAnimationState("open");
+      });
+    } else if (!isOpen && animationState === "open") {
+      setAnimationState("closing");
+      const timer = setTimeout(() => {
+        setAnimationState("closed");
+        onClose();
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, animationState, onClose]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -78,14 +97,19 @@ export default function ProjectOverlay({
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen && !isNavigating) {
+      if (
+        e.key === "Escape" &&
+        isOpen &&
+        !isNavigating &&
+        animationState === "open"
+      ) {
         onClose();
       }
     };
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [isOpen, isNavigating, onClose]);
+  }, [isOpen, isNavigating, onClose, animationState]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -154,22 +178,27 @@ export default function ProjectOverlay({
     };
   }, [isOpen, project?.link]);
 
-  const handleNavigate = () => {
+  const handleNavigate = async () => {
     if (!project?.link || isNavigating || isValidating) return;
 
+    // Set navigating state first
+    setIsNavigating(true);
+
+    // Small delay to ensure the UI updates
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
     if (project.link.startsWith("/")) {
-      flushSync(() => {
-        setIsNavigating(true);
-      });
-
-      requestAnimationFrame(() => {
+      // Use setTimeout to ensure the navigation happens after the UI update
+      setTimeout(() => {
         router.push(project.link ?? "");
-      });
-
+      }, 50);
       return;
     }
 
-    window.location.assign(project.link);
+    // For external links, use setTimeout to ensure UI updates
+    setTimeout(() => {
+      window.location.assign(project.link ?? "");
+    }, 50);
   };
 
   const toggleSection = (section: SectionKey) => {
@@ -285,12 +314,16 @@ export default function ProjectOverlay({
           "Possible 404, bad route, blocked page, or unavailable screenshot source."
         : project?.link || "NO LINK AVAILABLE";
 
-  if (!isOpen || !project) return null;
+  if (animationState === "closed" || !project) return null;
 
   return createPortal(
     <div
-      className={`threat-overlay-wrapper ${isNavigating ? "is-navigating" : ""}`}
-      onClick={isNavigating ? undefined : onClose}
+      className={`threat-overlay-wrapper ${
+        animationState === "open" ? "is-open" : ""
+      } ${animationState === "closing" ? "is-closing" : ""} ${
+        isNavigating ? "is-navigating" : ""
+      }`}
+      onClick={animationState === "open" && !isNavigating ? onClose : undefined}
     >
       <div className="threat-overlay-backdrop" />
 
@@ -457,14 +490,14 @@ export default function ProjectOverlay({
                 disabled={isNavigating || isValidating}
                 type="button"
               >
-                {isValidating ? (
-                  <>
-                    <span>VALIDATING...</span>
-                    <span className="stream-dots">●●●</span>
-                  </>
-                ) : isNavigating ? (
+                {isNavigating ? (
                   <>
                     <span>REDIRECTING</span>
+                    <span className="stream-dots">●●●</span>
+                  </>
+                ) : isValidating ? (
+                  <>
+                    <span>VALIDATING...</span>
                     <span className="stream-dots">●●●</span>
                   </>
                 ) : previewState === "ready" ? (

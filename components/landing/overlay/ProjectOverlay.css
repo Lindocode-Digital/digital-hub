@@ -16,8 +16,7 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at top, rgba(201, 9, 7, 0.1), transparent 40%),
-    rgba(3, 5, 10, 0.75);
+    radial-gradient(circle at top, transparent 40%), rgba(3, 5, 10, 0.2);
   backdrop-filter: blur(0px);
 }
 
