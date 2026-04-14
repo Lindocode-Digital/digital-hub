@@ -66,7 +66,7 @@
     rgba(255, 255, 255, 0.2) 90%,
     transparent 100%
   );
-  animation: scan 4.2s linear infinite;
+  animation: scan 4.2s linear;
   pointer-events: none;
   z-index: 4;
 }
