@@ -1,7 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { createPortal, flushSync } from "react-dom";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  useCallback,
+  startTransition,
+} from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/lib/projects";
 import "./ProjectOverlay.css";
@@ -36,6 +43,7 @@ export default function ProjectOverlay({
   onClose,
 }: ProjectOverlayProps) {
   const router = useRouter();
+
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -45,6 +53,30 @@ export default function ProjectOverlay({
   const [animationState, setAnimationState] = useState<
     "closed" | "open" | "closing"
   >("closed");
+
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const validationAbortRef = useRef<AbortController | null>(null);
+
+  const clearNavigationTimeout = useCallback(() => {
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
+      navigationTimeoutRef.current = null;
+    }
+  }, []);
+
+  const resetTransientState = useCallback(() => {
+    clearNavigationTimeout();
+
+    if (validationAbortRef.current) {
+      validationAbortRef.current.abort();
+      validationAbortRef.current = null;
+    }
+
+    setIsNavigating(false);
+    setIsValidating(false);
+  }, [clearNavigationTimeout]);
 
   // Handle animation states when isOpen changes
   useEffect(() => {
@@ -62,17 +94,19 @@ export default function ProjectOverlay({
     }
   }, [isOpen, animationState, onClose]);
 
+  // Reset navigating state when project changes or overlay closes
   useEffect(() => {
     if (!isOpen) {
-      setIsNavigating(false);
+      resetTransientState();
       return;
     }
 
     if (project) {
       setIsNavigating(false);
     }
-  }, [isOpen, project?.link, project]);
+  }, [isOpen, project, resetTransientState]);
 
+  // Reset states when overlay opens with new project
   useEffect(() => {
     if (isOpen && project) {
       setIsImageLoading(false);
@@ -84,6 +118,7 @@ export default function ProjectOverlay({
     }
   }, [isOpen, project]);
 
+  // Prevent body scroll when overlay is open
   useEffect(() => {
     if (!isOpen) return;
 
@@ -95,6 +130,7 @@ export default function ProjectOverlay({
     };
   }, [isOpen]);
 
+  // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (
@@ -111,6 +147,7 @@ export default function ProjectOverlay({
     return () => window.removeEventListener("keydown", handleEscape);
   }, [isOpen, isNavigating, onClose, animationState]);
 
+  // Handle touch move to prevent background scroll
   useEffect(() => {
     if (!isOpen) return;
 
@@ -128,12 +165,61 @@ export default function ProjectOverlay({
     };
   }, [isOpen]);
 
+  // Reset stale "redirecting" / "validating" state when the page is restored
+  // from history or bfcache after the user presses Back.
+  useEffect(() => {
+    const handlePageShow = () => {
+      resetTransientState();
+    };
+
+    const handleFocus = () => {
+      resetTransientState();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        resetTransientState();
+      }
+    };
+
+    const handlePopState = () => {
+      resetTransientState();
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("popstate", handlePopState);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [resetTransientState]);
+
+  // Cleanup pending async work on unmount
+  useEffect(() => {
+    return () => {
+      clearNavigationTimeout();
+
+      if (validationAbortRef.current) {
+        validationAbortRef.current.abort();
+        validationAbortRef.current = null;
+      }
+    };
+  }, [clearNavigationTimeout]);
+
+  // Validate project link
   useEffect(() => {
     if (!isOpen || !project?.link) {
       setIsValidating(false);
       return;
     }
 
+    const controller = new AbortController();
+    validationAbortRef.current = controller;
     let cancelled = false;
 
     const runValidation = async () => {
@@ -145,6 +231,7 @@ export default function ProjectOverlay({
       try {
         const response = await fetch(
           `${VALIDATION_ENDPOINT}/?action=validate&url=${encodeURIComponent(project.link ?? "")}`,
+          { signal: controller.signal },
         );
 
         const data: ValidationResult = await response.json();
@@ -157,7 +244,7 @@ export default function ProjectOverlay({
           setIsImageLoading(true);
         }
       } catch (error) {
-        if (cancelled) return;
+        if (cancelled || controller.signal.aborted) return;
 
         setValidation({
           ok: false,
@@ -165,7 +252,7 @@ export default function ProjectOverlay({
           error: error instanceof Error ? error.message : "Validation failed",
         });
       } finally {
-        if (!cancelled) {
+        if (!cancelled && !controller.signal.aborted) {
           setIsValidating(false);
         }
       }
@@ -175,29 +262,33 @@ export default function ProjectOverlay({
 
     return () => {
       cancelled = true;
+      controller.abort();
+
+      if (validationAbortRef.current === controller) {
+        validationAbortRef.current = null;
+      }
     };
   }, [isOpen, project?.link]);
 
-  const handleNavigate = async () => {
+  // Keep redirecting state visible during navigation,
+  // but clear it automatically when the user returns.
+  const handleNavigate = () => {
     if (!project?.link || isNavigating || isValidating) return;
 
-    // Set navigating state first
-    setIsNavigating(true);
+    const link = project.link;
 
-    // Small delay to ensure the UI updates
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    startTransition(() => {
+      setIsNavigating(true);
+    });
 
-    if (project.link.startsWith("/")) {
-      // Use setTimeout to ensure the navigation happens after the UI update
-      setTimeout(() => {
-        router.push(project.link ?? "");
-      }, 50);
-      return;
-    }
+    clearNavigationTimeout();
 
-    // For external links, use setTimeout to ensure UI updates
-    setTimeout(() => {
-      window.location.assign(project.link ?? "");
+    navigationTimeoutRef.current = setTimeout(() => {
+      if (link.startsWith("/")) {
+        router.push(link);
+      } else {
+        window.location.assign(link);
+      }
     }, 50);
   };
 
