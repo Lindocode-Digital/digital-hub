@@ -3,6 +3,7 @@ import Banner from "@/components/common/Banner";
 import Footer from "@/components/common/Footer";
 import CarouselShell from "./carousel/CarouselShell";
 import { projects } from "@/lib/projects";
+import ChipBackground from "../common/ChipBackground";
 
 export default function LandingPage() {
   return (
