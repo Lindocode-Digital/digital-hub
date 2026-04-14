@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, startTransition } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+  useCallback,
+  startTransition,
+} from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/lib/projects";
@@ -36,6 +43,7 @@ export default function ProjectOverlay({
   onClose,
 }: ProjectOverlayProps) {
   const router = useRouter();
+
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -45,6 +53,30 @@ export default function ProjectOverlay({
   const [animationState, setAnimationState] = useState<
     "closed" | "open" | "closing"
   >("closed");
+
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const validationAbortRef = useRef<AbortController | null>(null);
+
+  const clearNavigationTimeout = useCallback(() => {
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
+      navigationTimeoutRef.current = null;
+    }
+  }, []);
+
+  const resetTransientState = useCallback(() => {
+    clearNavigationTimeout();
+
+    if (validationAbortRef.current) {
+      validationAbortRef.current.abort();
+      validationAbortRef.current = null;
+    }
+
+    setIsNavigating(false);
+    setIsValidating(false);
+  }, [clearNavigationTimeout]);
 
   // Handle animation states when isOpen changes
   useEffect(() => {
@@ -65,14 +97,14 @@ export default function ProjectOverlay({
   // Reset navigating state when project changes or overlay closes
   useEffect(() => {
     if (!isOpen) {
-      setIsNavigating(false);
+      resetTransientState();
       return;
     }
 
     if (project) {
       setIsNavigating(false);
     }
-  }, [isOpen, project]);
+  }, [isOpen, project, resetTransientState]);
 
   // Reset states when overlay opens with new project
   useEffect(() => {
@@ -133,6 +165,52 @@ export default function ProjectOverlay({
     };
   }, [isOpen]);
 
+  // Reset stale "redirecting" / "validating" state when the page is restored
+  // from history or bfcache after the user presses Back.
+  useEffect(() => {
+    const handlePageShow = () => {
+      resetTransientState();
+    };
+
+    const handleFocus = () => {
+      resetTransientState();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        resetTransientState();
+      }
+    };
+
+    const handlePopState = () => {
+      resetTransientState();
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("popstate", handlePopState);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("popstate", handlePopState);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [resetTransientState]);
+
+  // Cleanup pending async work on unmount
+  useEffect(() => {
+    return () => {
+      clearNavigationTimeout();
+
+      if (validationAbortRef.current) {
+        validationAbortRef.current.abort();
+        validationAbortRef.current = null;
+      }
+    };
+  }, [clearNavigationTimeout]);
+
   // Validate project link
   useEffect(() => {
     if (!isOpen || !project?.link) {
@@ -140,6 +218,8 @@ export default function ProjectOverlay({
       return;
     }
 
+    const controller = new AbortController();
+    validationAbortRef.current = controller;
     let cancelled = false;
 
     const runValidation = async () => {
@@ -151,6 +231,7 @@ export default function ProjectOverlay({
       try {
         const response = await fetch(
           `${VALIDATION_ENDPOINT}/?action=validate&url=${encodeURIComponent(project.link ?? "")}`,
+          { signal: controller.signal },
         );
 
         const data: ValidationResult = await response.json();
@@ -163,7 +244,7 @@ export default function ProjectOverlay({
           setIsImageLoading(true);
         }
       } catch (error) {
-        if (cancelled) return;
+        if (cancelled || controller.signal.aborted) return;
 
         setValidation({
           ok: false,
@@ -171,7 +252,7 @@ export default function ProjectOverlay({
           error: error instanceof Error ? error.message : "Validation failed",
         });
       } finally {
-        if (!cancelled) {
+        if (!cancelled && !controller.signal.aborted) {
           setIsValidating(false);
         }
       }
@@ -181,22 +262,28 @@ export default function ProjectOverlay({
 
     return () => {
       cancelled = true;
+      controller.abort();
+
+      if (validationAbortRef.current === controller) {
+        validationAbortRef.current = null;
+      }
     };
   }, [isOpen, project?.link]);
 
-  // Handle navigation - FIXED: No flushSync to prevent back-button freeze
+  // Keep redirecting state visible during navigation,
+  // but clear it automatically when the user returns.
   const handleNavigate = () => {
     if (!project?.link || isNavigating || isValidating) return;
 
     const link = project.link;
 
-    // Use startTransition for smoother state update
     startTransition(() => {
       setIsNavigating(true);
     });
 
-    // Small delay to ensure UI updates before navigation
-    setTimeout(() => {
+    clearNavigationTimeout();
+
+    navigationTimeoutRef.current = setTimeout(() => {
       if (link.startsWith("/")) {
         router.push(link);
       } else {
@@ -204,6 +291,7 @@ export default function ProjectOverlay({
       }
     }, 50);
   };
+
   const toggleSection = (section: SectionKey) => {
     setOpenSection((prev) => (prev === section ? prev : section));
   };
