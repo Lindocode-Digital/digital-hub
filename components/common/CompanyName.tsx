@@ -8,8 +8,8 @@ export default function CompanyName() {
       className={clsx(
         "company-name-enter flex w-full justify-center",
         "flex-col items-center",
-        "gap-1", // Reduced from gap-1
-        "sm:gap-1", // Reduced from sm:gap-2
+        "gap-1.5", // Reduced from gap-1
+        "sm:gap-1.5", // Reduced from sm:gap-2
         "landscape:md:flex-row landscape:md:items-baseline landscape:md:gap-4",
       )}
     >
