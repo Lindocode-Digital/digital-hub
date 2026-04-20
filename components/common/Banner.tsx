@@ -30,7 +30,7 @@ export default function Banner({
         <div className="h-14 w-1 rounded-full bg-rose-600 sm:h-16" />
 
         <div className="min-w-0">
-          <p className="m-0 text-xs text-neutral-600 sm:text-sm">
+          <p className="m-0 text-xs text-neutral-600 sm:text-sm cursor-pointer">
             Elegant Simplicity
           </p>
 

@@ -20,22 +20,24 @@ export default function Footer() {
         "
       >
         <span className="inline-flex rounded-full p-0.5">
-          <Logo
-            size="compact"
-            scale={0.4}
-            postWidth={0.9}
-            dotWidth={1.5}
-            bulbWidth={0.7}
-            headWidth={2.3}
-            headPos={1.7}
-            rayPos={-0.7}
-            postMargin={33}
-            headColor="#4b5563"
-            postColor="#4b5563"
-            bulbColor="#4b5563"
-            rayColor="#4b5563"
-            dotColor="#4b5563"
-          />
+          <Link href="https://lindocode.com/" style={{ cursor: "pointer" }}>
+            <Logo
+              size="compact"
+              scale={0.4}
+              postWidth={0.9}
+              dotWidth={1.5}
+              bulbWidth={0.7}
+              headWidth={2.3}
+              headPos={1.7}
+              rayPos={-0.7}
+              postMargin={33}
+              headColor="#4b5563"
+              postColor="#4b5563"
+              bulbColor="#4b5563"
+              rayColor="#4b5563"
+              dotColor="#4b5563"
+            />
+          </Link>
         </span>
         <span>© {year} Lindocode Digital (Pty) Ltd. All rights reserved.</span>
       </div>
