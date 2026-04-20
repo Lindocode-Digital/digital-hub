@@ -27,7 +27,7 @@ export default function Footer() {
             dotWidth={1.5}
             bulbWidth={0.7}
             headWidth={2.3}
-            headPos={-1.7}
+            headPos={1.7}
             rayPos={-0.7}
             postMargin={33}
             headColor="#4b5563"

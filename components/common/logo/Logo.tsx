@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import type { CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
+import "./Logo.css";
 
 type LogoSize = "compact-xs" | "compact" | "medium" | "large";
 
@@ -114,21 +115,37 @@ export default function Logo({
   dotColor = "#dc2626",
   rayColor = "#111111",
 }: LogoProps) {
-  const preset = sizeConfig[size];
+  const preset = sizeConfig[size] ?? sizeConfig.medium;
 
-  const cfg = {
-    scale: scale ?? preset.scale,
-    lampHeight: lampHeight ?? preset.lampHeight,
-    postWidth: postWidth ?? preset.postWidth,
-    dotWidth: dotWidth ?? preset.dotWidth,
-    bulbWidth: bulbWidth ?? preset.bulbWidth,
-    postMargin: postMargin ?? preset.postMargin,
-    headWidth: headWidth ?? preset.headWidth,
-    headPos: headPos ?? preset.headPos,
-    rayPos: rayPos ?? preset.rayPos,
-    rayWidth: rayWidth ?? preset.rayWidth,
-    rayHeight: rayHeight ?? preset.rayHeight,
-  };
+  const cfg = useMemo(
+    () => ({
+      scale: scale ?? preset.scale,
+      lampHeight: lampHeight ?? preset.lampHeight,
+      postWidth: postWidth ?? preset.postWidth,
+      dotWidth: dotWidth ?? preset.dotWidth,
+      bulbWidth: bulbWidth ?? preset.bulbWidth,
+      postMargin: postMargin ?? preset.postMargin,
+      headWidth: headWidth ?? preset.headWidth,
+      headPos: headPos ?? preset.headPos,
+      rayPos: rayPos ?? preset.rayPos,
+      rayWidth: rayWidth ?? preset.rayWidth,
+      rayHeight: rayHeight ?? preset.rayHeight,
+    }),
+    [
+      scale,
+      lampHeight,
+      postWidth,
+      dotWidth,
+      bulbWidth,
+      postMargin,
+      headWidth,
+      headPos,
+      rayPos,
+      rayWidth,
+      rayHeight,
+      preset,
+    ],
+  );
 
   const s = cfg.scale;
 
@@ -154,7 +171,7 @@ export default function Logo({
   const headStyle: CSSProperties = {
     width: `${cfg.headWidth * s}rem`,
     height: `${1 * s}rem`,
-    bottom: `${-cfg.headPos * s}rem`,
+    bottom: `${cfg.headPos * s}rem`,
     backgroundColor: headColor,
     zIndex: 3,
   };
@@ -162,7 +179,7 @@ export default function Logo({
   const bulbStyle: CSSProperties = {
     width: `${cfg.bulbWidth * s}rem`,
     height: `${0.8 * s}rem`,
-    bottom: `${-0.2 * s}rem`,
+    bottom: `${(cfg.headPos - 0.3) * s}rem`,
     backgroundColor: bulbColor,
     zIndex: 2,
   };
@@ -188,9 +205,8 @@ export default function Logo({
         <span className="tm-logo-lamp-dot" style={dotStyle} />
       </span>
 
-      <span className="tm-logo-lamp-head" style={headStyle}>
-        <span className="tm-logo-lamp-bulb" style={bulbStyle} />
-      </span>
+      <span className="tm-logo-lamp-head" style={headStyle} />
+      <span className="tm-logo-lamp-bulb" style={bulbStyle} />
 
       <span className="tm-logo-lamp-rays" style={raysStyle}>
         <span className="tm-logo-ray left" style={rayStyle} />
