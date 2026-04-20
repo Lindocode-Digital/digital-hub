@@ -8,11 +8,20 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Press Start";
+  src: url("/fonts/PressStart2P-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --font-sans: var(--font-jost);
   --font-display: var(--font-playfair);
   --font-alt: var(--font-montserrat);
   --font-lemon: "Lemon Milk Pro", sans-serif;
+  --font-press: "Press Start", monospace;
   --color-brand: #e11d48;
   --color-muted: #4b5563;
   --color-soft: #6b7280;
