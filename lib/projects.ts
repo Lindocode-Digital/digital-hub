@@ -20,6 +20,7 @@ export type ProjectIcon = {
 };
 
 export type Project = {
+  cardId: string;
   slug: string;
   title: string;
   cardTitle: string;
@@ -36,6 +37,7 @@ export type Project = {
 
 export const projects: Project[] = [
   {
+    cardId: "01",
     slug: "/",
     domain: "lindocode.com",
     title: "Lindocode Digital",
@@ -58,6 +60,7 @@ export const projects: Project[] = [
     },
   },
   {
+    cardId: "02",
     slug: "/",
     domain: "portfolio.lindocode.com",
     title: "PORTFOLIO",
@@ -80,6 +83,7 @@ export const projects: Project[] = [
   },
 
   {
+    cardId: "03",
     slug: "/",
     domain: "sdrowvieli.lindocode.com",
     title: "Sdrow Vieli",
@@ -102,6 +106,7 @@ export const projects: Project[] = [
   },
 
   {
+    cardId: "04",
     slug: "/projects",
     domain: "lindocode.com",
     title: "Featured Projects",

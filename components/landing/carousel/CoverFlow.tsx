@@ -60,11 +60,9 @@ export default function CoverFlow({ covers }: CoverFlowProps) {
 
   const handleCardAction = (cover: CoverItem, index: number) => {
     if (index === activeIndex) {
-      // Active card - show overlay
       setSelectedProject(cover);
       setIsOverlayOpen(true);
     } else {
-      // Inactive card - make it active
       setActiveIndex(index);
     }
   };
@@ -83,7 +81,7 @@ export default function CoverFlow({ covers }: CoverFlowProps) {
 
           return (
             <CoverFlowCard
-              key={cover.slug ?? String(index)}
+              key={cover.cardId ?? String(index)}
               cover={cover}
               isActive={isActive}
               offset={offset}
