@@ -16,7 +16,6 @@
   border: 2px solid transparent;
 }
 
-/* Image layer */
 .coverflow-card-media {
   position: absolute;
   inset: 0;
@@ -44,7 +43,6 @@
   opacity: 1;
 }
 
-/* Shimmer base */
 .coverflow-card.loading .coverflow-card-media::before {
   content: "";
   position: absolute;
@@ -53,7 +51,6 @@
   z-index: 0;
 }
 
-/* Shimmer sweep */
 .coverflow-card.loading .coverflow-card-media::after {
   content: "";
   position: absolute;
@@ -73,7 +70,6 @@
   content: none;
 }
 
-/* Optional overlay */
 .coverflow-card::before {
   content: "";
   position: absolute;
@@ -89,7 +85,6 @@
   background: rgba(0, 0, 0, 0.06);
 }
 
-/* Active card styling */
 .coverflow-card.active {
   border-color: transparent;
   box-shadow:
@@ -101,7 +96,6 @@
   transform: scale(1.035);
 }
 
-/* Showcase-inspired UI */
 .cflow-ui-overlay {
   position: absolute;
   inset: 0;
@@ -324,7 +318,6 @@
   }
 }
 
-/* Mobile Portrait (up to 767px) */
 @media (max-width: 767px) {
   .coverflow-card {
     width: 180px;
@@ -361,7 +354,6 @@
   }
 }
 
-/* Mobile Landscape (568px to 767px) */
 @media (min-width: 568px) and (max-width: 767px) and (orientation: landscape) {
   .coverflow-card {
     width: 150px;
@@ -376,7 +368,6 @@
   }
 }
 
-/* Small Mobile (up to 480px) */
 @media (max-width: 480px) {
   .coverflow-card {
     width: 160px;
@@ -422,14 +413,12 @@
   }
 }
 
-/* Small Mobile Landscape (up to 568px) */
 @media (max-width: 567px) and (orientation: landscape) {
   .coverflow-card {
     width: 190px;
   }
 }
 
-/* Very Small Devices (up to 360px) */
 @media (max-width: 360px) {
   .coverflow-card {
     width: 8.5rem;
@@ -440,7 +429,6 @@
   }
 }
 
-/* Tablet Portrait (768px to 1024px) */
 @media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
   .coverflow-card {
     width: 220px;
@@ -453,21 +441,18 @@
   }
 }
 
-/* Tablet Landscape (768px to 1024px) */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
   .coverflow-card {
     width: 180px;
   }
 }
 
-/* Large Tablet (1025px to 1280px) */
 @media (min-width: 1024px) and (max-width: 1280px) {
   .coverflow-card {
     width: 210px;
   }
 }
 
-/* Desktop (1281px and above) */
 @media (min-width: 1281px) {
   .coverflow-card {
     width: 250px;
@@ -496,14 +481,12 @@
   }
 }
 
-/* Ultra-wide screens (1920px and above) */
 @media (min-width: 1920px) {
   .coverflow-card {
     width: 250px;
   }
 }
 
-/* Touch device optimizations */
 @media (hover: none) and (pointer: coarse) {
   .coverflow-card {
     transition:
@@ -518,7 +501,6 @@
   }
 }
 
-/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .coverflow-card {
     transition: none;
@@ -533,7 +515,6 @@
   }
 }
 
-/* Disable buggy native reflection on iOS Safari */
 @supports (-webkit-touch-callout: none) {
   .coverflow-card {
     -webkit-box-reflect: unset !important;
