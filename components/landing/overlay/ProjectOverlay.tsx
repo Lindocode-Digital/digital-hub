@@ -165,8 +165,6 @@ export default function ProjectOverlay({
     };
   }, [isOpen]);
 
-  // Reset stale "redirecting" / "validating" state when the page is restored
-  // from history or bfcache after the user presses Back.
   useEffect(() => {
     const handlePageShow = () => {
       resetTransientState();
@@ -199,7 +197,6 @@ export default function ProjectOverlay({
     };
   }, [resetTransientState]);
 
-  // Cleanup pending async work on unmount
   useEffect(() => {
     return () => {
       clearNavigationTimeout();
@@ -211,7 +208,6 @@ export default function ProjectOverlay({
     };
   }, [clearNavigationTimeout]);
 
-  // Validate project link
   useEffect(() => {
     if (!isOpen || !project?.link) {
       setIsValidating(false);
@@ -270,8 +266,6 @@ export default function ProjectOverlay({
     };
   }, [isOpen, project?.link]);
 
-  // Keep redirecting state visible during navigation,
-  // but clear it automatically when the user returns.
   const handleNavigate = () => {
     if (!project?.link || isNavigating || isValidating) return;
 

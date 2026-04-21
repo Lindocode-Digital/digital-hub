@@ -1,4 +1,3 @@
-// components/carousel/CoverFlow.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -22,7 +21,9 @@ type CoverFlowProps = {
 export default function CoverFlow({ covers }: CoverFlowProps) {
   const router = useRouter();
   const navigatingRef = useRef(false);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() =>
+    covers.length > 1 ? 1 : 0,
+  );
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
@@ -41,8 +42,10 @@ export default function CoverFlow({ covers }: CoverFlowProps) {
   }, []);
 
   useEffect(() => {
+    if (covers.length === 0) return;
+
     if (activeIndex > covers.length - 1) {
-      setActiveIndex(0);
+      setActiveIndex(covers.length > 1 ? 1 : 0);
     }
   }, [covers.length, activeIndex]);
 

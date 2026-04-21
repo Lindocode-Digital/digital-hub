@@ -39,6 +39,29 @@ export const projects: Project[] = [
   {
     cardId: "01",
     slug: "/",
+    domain: "sdrowvieli.lindocode.com",
+    title: "Sdrow Vieli",
+    cardTitle: "SDROW VIELI",
+    cardSubtitle: "Writing",
+    description: "Art of Storytelling",
+    image:
+      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards6.webp",
+    background: "",
+    color: "",
+    link: "https://sdrowvieli.lindocode.com",
+    attribute: {
+      artistName: "Andrew Neel",
+      artistLink:
+        "https://unsplash.com/@andrewtneel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistWorkLink:
+        "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistPlatform: "Unsplash",
+    },
+  },
+
+  {
+    cardId: "02",
+    slug: "/",
     domain: "lindocode.com",
     title: "Lindocode Digital",
     cardTitle: "Lindocode Digital™",
@@ -60,7 +83,7 @@ export const projects: Project[] = [
     },
   },
   {
-    cardId: "02",
+    cardId: "03",
     slug: "/",
     domain: "portfolio.lindocode.com",
     title: "PORTFOLIO",
@@ -71,36 +94,13 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards7.webp",
     background: "",
     color: "",
-    link: "",
+    link: "https://portfolio.lindocode.com",
     attribute: {
       artistName: "Kelly Sikkema",
       artistLink:
         "https://unsplash.com/@kellysikkema?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistWorkLink:
         "https://unsplash.com/photos/yellow-click-pen-on-white-printer-paper-gcHFXsdcmJE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
-      artistPlatform: "Unsplash",
-    },
-  },
-
-  {
-    cardId: "03",
-    slug: "/",
-    domain: "sdrowvieli.lindocode.com",
-    title: "Sdrow Vieli",
-    cardTitle: "SDROW VIELI",
-    cardSubtitle: "Writing",
-    description: "Art of Storytelling",
-    image:
-      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards6.webp",
-    background: "",
-    color: "",
-    link: "https://sdrowvieli.lindocode.com",
-    attribute: {
-      artistName: "Andrew Neel",
-      artistLink:
-        "https://unsplash.com/@andrewtneel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
-      artistWorkLink:
-        "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistPlatform: "Unsplash",
     },
   },
