@@ -71,7 +71,7 @@ export const projects: Project[] = [
       "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards7.webp",
     background: "",
     color: "",
-    link: "",
+    link: "https://portfolio.lindocode.com",
     attribute: {
       artistName: "Kelly Sikkema",
       artistLink:
