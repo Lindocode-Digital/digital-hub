@@ -62,6 +62,29 @@ export const projects: Project[] = [
   {
     cardId: "02",
     slug: "/",
+    domain: "portfolio.lindocode.com",
+    title: "PORTFOLIO",
+    cardTitle: "PORTFOLIO",
+    cardSubtitle: "Fullstack",
+    description: "Web|Mobile Developer",
+    image:
+      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards7.webp",
+    background: "",
+    color: "",
+    link: "https://portfolio.lindocode.com",
+    attribute: {
+      artistName: "Kelly Sikkema",
+      artistLink:
+        "https://unsplash.com/@kellysikkema?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistWorkLink:
+        "https://unsplash.com/photos/yellow-click-pen-on-white-printer-paper-gcHFXsdcmJE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistPlatform: "Unsplash",
+    },
+  },
+
+  {
+    cardId: "03",
+    slug: "/",
     domain: "lindocode.com",
     title: "Lindocode Digital",
     cardTitle: "Lindocode Digital™",
@@ -73,28 +96,6 @@ export const projects: Project[] = [
     background: "",
     color: "",
     link: "https://lindocode.com",
-    attribute: {
-      artistName: "Kelly Sikkema",
-      artistLink:
-        "https://unsplash.com/@kellysikkema?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
-      artistWorkLink:
-        "https://unsplash.com/photos/yellow-click-pen-on-white-printer-paper-gcHFXsdcmJE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
-      artistPlatform: "Unsplash",
-    },
-  },
-  {
-    cardId: "03",
-    slug: "/",
-    domain: "portfolio.lindocode.com",
-    title: "PORTFOLIO",
-    cardTitle: "PORTFOLIO",
-    cardSubtitle: "Fullstack",
-    description: "Web|Mobile Developer",
-    image:
-      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards7.webp",
-    background: "",
-    color: "",
-    link: "https://portfolio.lindocode.com",
     attribute: {
       artistName: "Kelly Sikkema",
       artistLink:
