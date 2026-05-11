@@ -81,7 +81,6 @@ export const projects: Project[] = [
       artistPlatform: "Unsplash",
     },
   },
-
   {
     cardId: "03",
     slug: "/",
@@ -108,6 +107,29 @@ export const projects: Project[] = [
 
   {
     cardId: "04",
+    slug: "/",
+    domain: "lazyreader.lindocode.com",
+    title: "LazyReader",
+    cardTitle: "LAZYREADER",
+    cardSubtitle: "Mobile",
+    description: "Reading Experience",
+    image:
+      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards9.webp",
+    background: "",
+    color: "",
+    link: "https://lazyreader.lindocode.com",
+    attribute: {
+      artistName: "Andrew Neel",
+      artistLink:
+        "https://unsplash.com/@andrewtneel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistWorkLink:
+        "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistPlatform: "Unsplash",
+    },
+  },
+
+  {
+    cardId: "05",
     slug: "/projects",
     domain: "lindocode.com",
     title: "Featured Projects",
