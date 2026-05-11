@@ -22,7 +22,7 @@ export default function CoverFlow({ covers }: CoverFlowProps) {
   const router = useRouter();
   const navigatingRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(() =>
-    covers.length > 1 ? 1 : 0,
+    covers.length > 1 ? 2 : 0,
   );
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
