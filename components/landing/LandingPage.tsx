@@ -33,11 +33,7 @@ export default function LandingPage() {
         </div>
 
         <div className="flex-shrink-0">
-          <Banner
-            textLeft="INSPECT."
-            textMiddle="VERIFY."
-            textRight="ACCESS."
-          />
+          <Banner />
         </div>
 
         <div className="flex-shrink-0">

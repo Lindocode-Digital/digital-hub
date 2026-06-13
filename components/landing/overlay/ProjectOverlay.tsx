@@ -119,7 +119,9 @@ export default function ProjectOverlay({
   // Reset states when overlay opens with new project
   useEffect(() => {
     if (isOpen && project) {
-      setIsImageLoading(false);
+      // If a static background image is set, start loading it right away
+      // without waiting for link validation to complete.
+      setIsImageLoading(Boolean(project.background));
       setImageError(false);
       setIsNavigating(false);
       setShowDisclaimer(false);
@@ -247,7 +249,9 @@ export default function ProjectOverlay({
 
         setValidation(data);
 
-        if (data.isWorking) {
+        // Only start the image spinner here for live screenshots.
+        // Background images already started loading on open.
+        if (data.isWorking && !project?.background) {
           setIsImageLoading(true);
         }
       } catch (error) {
@@ -311,10 +315,12 @@ export default function ProjectOverlay({
 
   const screenshotUrl = useMemo(() => {
     if (!project?.link) return "";
+    // Static background image takes priority over a live microlink capture.
+    if (project.background) return project.background;
     return `https://api.microlink.io/?url=${encodeURIComponent(
       project.link,
     )}&screenshot=true&embed=screenshot.url`;
-  }, [project?.link]);
+  }, [project?.link, project?.background]);
 
   const hasLink = Boolean(project?.link);
   const isLinkWorking = Boolean(validation?.isWorking);
