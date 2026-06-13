@@ -306,11 +306,7 @@ export default function ProjectOverlay({
       ? "loading"
       : !isLinkWorking
         ? "broken"
-        : isImageLoading
-          ? "loading"
-          : imageError
-            ? "broken"
-            : "ready";
+        : "ready";
 
   const isStatusActive = previewState === "ready";
   const isBrokenState = previewState === "broken";
@@ -501,6 +497,7 @@ export default function ProjectOverlay({
                 isBrokenState ? "is-broken-preview" : ""
               } ${previewState === "missing" ? "is-missing-preview" : ""}`}
             >
+              {/* Validation states: still checking / link down / no link */}
               {(previewState === "loading" ||
                 previewState === "broken" ||
                 previewState === "missing") && (
@@ -528,13 +525,42 @@ export default function ProjectOverlay({
                 </div>
               )}
 
+              {/* Link verified — screenshot capturing */}
+              {previewState === "ready" && isImageLoading && (
+                <div className="screenshot-loading">
+                  <div className="preview-status-badge">LIVE FEED</div>
+                  <div className="loading-spinner" />
+                  <span>CAPTURING LIVE PREVIEW</span>
+                  <span className="loading-url">{project?.link}</span>
+                </div>
+              )}
+
+              {/* Link verified — screenshot blocked/unavailable */}
+              {previewState === "ready" && !isImageLoading && imageError && (
+                <div className="screenshot-loading is-error">
+                  <div className="preview-status-badge">PREVIEW</div>
+                  <div className="error-icon" style={{ fontSize: "22px" }}>
+                    ⊘
+                  </div>
+                  <span>SCREENSHOT UNAVAILABLE</span>
+                  <span className="loading-url">
+                    Link verified — preview blocked or restricted
+                  </span>
+                </div>
+              )}
+
               {hasLink && isLinkWorking && (
                 <img
                   src={screenshotUrl}
                   alt={project.title}
                   className="threat-image"
                   style={{
-                    display: previewState === "ready" ? "block" : "none",
+                    display:
+                      previewState === "ready" &&
+                      !isImageLoading &&
+                      !imageError
+                        ? "block"
+                        : "none",
                   }}
                   onLoad={() => {
                     setIsImageLoading(false);
@@ -565,9 +591,11 @@ export default function ProjectOverlay({
                     }
                   />
                   <span>
-                    {previewState === "ready"
-                      ? "LIVE FEED"
-                      : previewState === "loading"
+                    {previewState === "ready" && !isImageLoading
+                      ? imageError
+                        ? "PREVIEW"
+                        : "LIVE FEED"
+                      : previewState === "loading" || isImageLoading
                         ? "CHECKING"
                         : "ALERT"}
                   </span>

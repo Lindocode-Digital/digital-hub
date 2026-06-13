@@ -16,7 +16,7 @@ export default function LandingPage() {
           lg:px-8 lg:py-6 lg:gap-6
         "
       >
-        <div className="flex-shrink-0 -mb-5 md:-mb-3 lg:-mb-4">
+        <div className="flex-shrink-0">
           <CompanyName />
         </div>
 
