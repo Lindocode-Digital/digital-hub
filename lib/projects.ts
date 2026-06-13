@@ -54,7 +54,10 @@ export const projects: Project[] = [
     title: "Featured Projects",
     cardTitle: "SHOWCASE",
     cardSubtitle: "Projects",
-    description: "Web & Mobile Apps",
+    description: [
+      "Web & Mobile Apps",
+      "A curated showcase of web and mobile applications built by Lindocode Digital. Browse production-ready projects spanning full-stack web platforms, mobile readers, writing tools, and developer utilities - each shipped with a focus on performance, clean design, and real-world utility.",
+    ],
     image:
       "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fcreativehub_images_cards_projects.webp",
     background:
