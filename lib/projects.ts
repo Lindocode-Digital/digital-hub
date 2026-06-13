@@ -38,20 +38,21 @@ export type Project = {
 export const projects: Project[] = [
   {
     cardId: "01",
-    slug: "/",
-    domain: "sdrowvieli.lindocode.com",
-    title: "Sdrow Vieli",
-    cardTitle: "SDROW VIELI",
-    cardSubtitle: "Writing",
-    description: "Art of Storytelling",
-    image: "https://picsum.photos/seed/sdrowvieli-writing/800/534",
+    slug: "/projects",
+    domain: "lindocode.com",
+    title: "Featured Projects",
+    cardTitle: "SHOWCASE",
+    cardSubtitle: "Projects",
+    description: "Web & Mobile Apps",
+    image:
+      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fcreativehub_images_cards_projects.webp",
     background: "",
     color: "",
-    link: "https://sdrowvieli.lindocode.com",
+    link: "https://lindocode.com/projects",
     attribute: {
       artistName: "Andrew Neel",
       artistLink:
-        "https://unsplash.com/@andrewtneel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+        "https://unsplash.com/@andrewt neel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistWorkLink:
         "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistPlatform: "Unsplash",
@@ -80,6 +81,7 @@ export const projects: Project[] = [
       artistPlatform: "Unsplash",
     },
   },
+
   {
     cardId: "03",
     slug: "/",
@@ -113,7 +115,7 @@ export const projects: Project[] = [
     cardSubtitle: "Mobile",
     description: "Reading Experience",
     image:
-      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fcreativehub_images_cards_cards9.webp",
+      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fnew_mockups.webp",
     background: "",
     color: "",
     link: "https://lazyreader.lindocode.com",
@@ -126,24 +128,23 @@ export const projects: Project[] = [
       artistPlatform: "Unsplash",
     },
   },
-
   {
     cardId: "05",
-    slug: "/projects",
-    domain: "lindocode.com",
-    title: "Featured Projects",
-    cardTitle: "SHOWCASE",
-    cardSubtitle: "Projects",
-    description: "Web & Mobile Apps",
+    slug: "/",
+    domain: "lazyauthor.lindocode.com",
+    title: "LazyAuthor",
+    cardTitle: "LAZYAUTHOR",
+    cardSubtitle: "Writing",
+    description: "Art of Storytelling",
     image:
-      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fcreativehub_images_cards_projects.webp",
+      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fnew_mockup.webp",
     background: "",
     color: "",
-    link: "https://lindocode.com/projects",
+    link: "https://sdrowvieli.lindocode.com",
     attribute: {
       artistName: "Andrew Neel",
       artistLink:
-        "https://unsplash.com/@andrewt neel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+        "https://unsplash.com/@andrewtneel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistWorkLink:
         "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
       artistPlatform: "Unsplash",
