@@ -119,15 +119,16 @@ export default function ProjectOverlay({
   // Reset states when overlay opens with new project
   useEffect(() => {
     if (isOpen && project) {
-      // If a static background image is set, start loading it right away
-      // without waiting for link validation to complete.
-      setIsImageLoading(Boolean(project.background));
+      const isShowcase = project.cardId !== "link-check";
+      // Showcase projects start image loading immediately (background → image fallback).
+      // User-submitted links only load after validation confirms the link is live.
+      setIsImageLoading(Boolean(isShowcase ? (project.background || project.image) : project.background));
       setImageError(false);
       setIsNavigating(false);
       setShowDisclaimer(false);
       setOpenSection("overview");
       setValidation(null);
-      setIsValidating(Boolean(project.link));
+      setIsValidating(!isShowcase && Boolean(project.link));
     }
   }, [isOpen, project]);
 
@@ -222,7 +223,7 @@ export default function ProjectOverlay({
   }, [clearNavigationTimeout]);
 
   useEffect(() => {
-    if (!isOpen || !project?.link) {
+    if (!isOpen || !project?.link || project.cardId !== "link-check") {
       setIsValidating(false);
       return;
     }
@@ -279,7 +280,7 @@ export default function ProjectOverlay({
         validationAbortRef.current = null;
       }
     };
-  }, [isOpen, project?.link]);
+  }, [isOpen, project?.link, project?.cardId]);
 
   // Links scanned via the LinkChecker bar get the safety disclaimer on open.
   // Curated projects in lib/projects.ts (cardId !== "link-check") skip it.
@@ -487,6 +488,228 @@ export default function ProjectOverlay({
         : project?.link || "NO LINK AVAILABLE";
 
   if (animationState === "closed" || !project) return null;
+
+  // Showcase projects (lib/projects.ts) get a clean image + stats panel,
+  // not the security analysis UI.
+  if (!isUserLink) {
+    const showcaseImageSrc = project.background || project.image || "";
+    return createPortal(
+      <div
+        className={`threat-overlay-wrapper ${animationState === "open" ? "is-open" : ""} ${animationState === "closing" ? "is-closing" : ""} ${isNavigating ? "is-navigating" : ""}`}
+        onClick={animationState === "open" && !isNavigating ? onClose : undefined}
+      >
+        <div className="threat-overlay-backdrop" />
+        <div
+          className="threat-overlay-panel"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${project.title} showcase`}
+        >
+          <div className="scan-line" />
+          <div className="glow-effect" />
+          <div className="grid-overlay" />
+
+          <div className="threat-header">
+            <div className="threat-title-section">
+              <span className="threat-badge">SHOWCASE</span>
+              <div className="threat-title-stack">
+                <span className="threat-code">{projectCode}</span>
+                <h2 className="threat-main-title">{project.title}</h2>
+              </div>
+            </div>
+            <button
+              className="threat-close"
+              onClick={onClose}
+              disabled={isNavigating}
+              aria-label="Close overlay"
+              type="button"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="threat-content">
+            {/* Left — image */}
+            <div className="threat-image-panel">
+              <div className="image-container">
+                {showcaseImageSrc ? (
+                  <>
+                    {isImageLoading && !imageError && (
+                      <div className="screenshot-loading">
+                        <div className="preview-status-badge">PREVIEW</div>
+                        <div className="loading-spinner" />
+                      </div>
+                    )}
+                    {imageError && (
+                      <div className="screenshot-loading is-error">
+                        <div className="preview-status-badge">PREVIEW</div>
+                        <div className="error-icon" style={{ fontSize: "22px" }}>⊘</div>
+                        <span>IMAGE UNAVAILABLE</span>
+                      </div>
+                    )}
+                    <img
+                      src={showcaseImageSrc}
+                      alt={project.title}
+                      className="threat-image"
+                      style={{ display: !isImageLoading && !imageError ? "block" : "none" }}
+                      onLoad={() => { setIsImageLoading(false); setImageError(false); }}
+                      onError={() => { setImageError(true); setIsImageLoading(false); }}
+                    />
+                  </>
+                ) : (
+                  <div className="screenshot-loading is-error">
+                    <div className="preview-status-badge">SHOWCASE</div>
+                    <div className="error-icon" style={{ fontSize: "22px" }}>⊘</div>
+                    <span>NO PREVIEW AVAILABLE</span>
+                  </div>
+                )}
+
+                <div className="image-data-overlay">
+                  <div className="data-tag">
+                    <span className="dot" />
+                    <span>SHOWCASE</span>
+                  </div>
+                  <div className="image-caption">
+                    <span className="image-caption-label">TYPE</span>
+                    <span className="image-caption-value">
+                      {project.cardSubtitle ?? project.description}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="quick-stats">
+                <div className="stat-card">
+                  <span className="stat-label">DOMAIN</span>
+                  <span className="stat-value online">{project.domain ?? "—"}</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">CATEGORY</span>
+                  <span className="stat-value">{project.cardSubtitle ?? "PROJECT"}</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">STATUS</span>
+                  <span className="stat-value online">ACTIVE</span>
+                </div>
+              </div>
+
+              {project.link ? (
+                <button
+                  className="threat-enter-link is-safe"
+                  onClick={() =>
+                    window.open(project.link!, "_blank", "noopener,noreferrer")
+                  }
+                  disabled={isNavigating}
+                  type="button"
+                >
+                  VISIT PROJECT ↗
+                </button>
+              ) : (
+                <button
+                  className="threat-enter-link is-disabled-look"
+                  disabled
+                  type="button"
+                >
+                  LINK REQUIRED
+                </button>
+              )}
+            </div>
+
+            {/* Right — project stats */}
+            <div className="threat-data-panel">
+              <div className="hero-summary">
+                <span className="hero-summary-kicker">ABOUT THIS PROJECT</span>
+                <p className="hero-summary-text">{project.description}</p>
+                {project.extra && (
+                  <p
+                    className="hero-summary-text"
+                    style={{ marginTop: 10, color: "rgba(245, 247, 251, 0.6)" }}
+                  >
+                    {project.extra}
+                  </p>
+                )}
+              </div>
+
+              <div className="data-section">
+                <div className="section-header">
+                  <span className="section-title-wrap">
+                    <span className="section-icon">◆</span>
+                    <span className="section-title">PROJECT DETAILS</span>
+                  </span>
+                </div>
+                <div className="section-body">
+                  <div className="data-grid-2col">
+                    <div className="data-field">
+                      <span className="field-label">TITLE</span>
+                      <span className="field-value">{project.cardTitle}</span>
+                    </div>
+                    <div className="data-field">
+                      <span className="field-label">TYPE</span>
+                      <span className="field-value">{project.cardSubtitle ?? "—"}</span>
+                    </div>
+                    <div className="data-field">
+                      <span className="field-label">DOMAIN</span>
+                      <span className="field-value mono">{project.domain ?? "—"}</span>
+                    </div>
+                    <div className="data-field">
+                      <span className="field-label">LINK</span>
+                      <span className="field-value mono">{project.link ?? "—"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {project.attribute && (
+                <div className="data-section">
+                  <div className="section-header">
+                    <span className="section-title-wrap">
+                      <span className="section-icon">◆</span>
+                      <span className="section-title">IMAGE CREDIT</span>
+                    </span>
+                  </div>
+                  <div className="section-body">
+                    <div className="data-grid-2col">
+                      <div className="data-field">
+                        <span className="field-label">ARTIST</span>
+                        <span className="field-value">
+                          {project.attribute.artistName}
+                        </span>
+                      </div>
+                      <div className="data-field">
+                        <span className="field-label">PLATFORM</span>
+                        <span className="field-value">
+                          {project.attribute.artistPlatform}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="data-stream">
+                <span className="stream-text">SHOWCASE_MODE_ACTIVE</span>
+                <span className="stream-dots">●●●</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="threat-footer">
+            <div className="footer-left">
+              <span className="dot" />
+              <span>CURATED PROJECT</span>
+            </div>
+            <div className="footer-right">
+              <span>{project.domain ?? "LINDOCODE"}</span>
+              <span>|</span>
+              <span>SHOWCASE</span>
+            </div>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
 
   let checkHostname = "";
   try {
