@@ -16,11 +16,8 @@ export default function LandingPage() {
           lg:px-8 lg:py-6 lg:gap-6
         "
       >
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex flex-col items-center gap-7 sm:gap-6 md:gap-5">
           <CompanyName />
-        </div>
-
-        <div className="flex-shrink-0">
           <LinkChecker />
         </div>
 
