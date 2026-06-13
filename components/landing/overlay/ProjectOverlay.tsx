@@ -11,6 +11,7 @@ import {
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/lib/projects";
+import { cardDescription, overlayDescription } from "@/lib/projects";
 import "./ProjectOverlay.css";
 
 type ProjectOverlayProps = {
@@ -19,7 +20,7 @@ type ProjectOverlayProps = {
   onClose: () => void;
 };
 
-type SectionKey = "overview" | "diagnostics" | "recommendation";
+type SectionKey = "overview" | "diagnostics" | "recommendation" | "redirects";
 
 type PreviewState = "loading" | "ready" | "broken" | "missing";
 
@@ -33,9 +34,18 @@ type ValidationResult = {
   contentType?: string | null;
   error?: string;
   link?: string;
+  redirectChain?: string[];
+  responseTime?: number;
 };
 
-const VALIDATION_ENDPOINT = "https://dawn-violet-bb5b.sdrowvieli1.workers.dev";
+type FlagVariant = "safe" | "warn" | "danger" | "neutral";
+
+type DiagnosticFlag = {
+  label: string;
+  variant: FlagVariant;
+};
+
+const VALIDATION_ENDPOINT = "/digitalhub/api/validate";
 
 export default function ProjectOverlay({
   project,
@@ -47,6 +57,7 @@ export default function ProjectOverlay({
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [openSection, setOpenSection] = useState<SectionKey>("overview");
   const [isValidating, setIsValidating] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
@@ -109,12 +120,16 @@ export default function ProjectOverlay({
   // Reset states when overlay opens with new project
   useEffect(() => {
     if (isOpen && project) {
-      setIsImageLoading(false);
+      const isShowcase = project.cardId !== "link-check";
+      // Showcase projects start image loading immediately (background → image fallback).
+      // User-submitted links only load after validation confirms the link is live.
+      setIsImageLoading(Boolean(isShowcase ? (project.background || project.image) : project.background));
       setImageError(false);
       setIsNavigating(false);
+      setShowDisclaimer(false);
       setOpenSection("overview");
       setValidation(null);
-      setIsValidating(Boolean(project.link));
+      setIsValidating(!isShowcase && Boolean(project.link));
     }
   }, [isOpen, project]);
 
@@ -209,7 +224,7 @@ export default function ProjectOverlay({
   }, [clearNavigationTimeout]);
 
   useEffect(() => {
-    if (!isOpen || !project?.link) {
+    if (!isOpen || !project?.link || project.cardId !== "link-check") {
       setIsValidating(false);
       return;
     }
@@ -226,7 +241,7 @@ export default function ProjectOverlay({
 
       try {
         const response = await fetch(
-          `${VALIDATION_ENDPOINT}/?action=validate&url=${encodeURIComponent(project.link ?? "")}`,
+          `${VALIDATION_ENDPOINT}?url=${encodeURIComponent(project.link ?? "")}`,
           { signal: controller.signal },
         );
 
@@ -236,7 +251,9 @@ export default function ProjectOverlay({
 
         setValidation(data);
 
-        if (data.isWorking) {
+        // Only start the image spinner here for live screenshots.
+        // Background images already started loading on open.
+        if (data.isWorking && !project?.background) {
           setIsImageLoading(true);
         }
       } catch (error) {
@@ -264,26 +281,34 @@ export default function ProjectOverlay({
         validationAbortRef.current = null;
       }
     };
-  }, [isOpen, project?.link]);
+  }, [isOpen, project?.link, project?.cardId]);
 
-  const handleNavigate = () => {
-    if (!project?.link || isNavigating || isValidating) return;
+  // Links scanned via the LinkChecker bar get the safety disclaimer on open.
+  // Curated projects in lib/projects.ts (cardId !== "link-check") skip it.
+  const isUserLink = project?.cardId === "link-check";
 
+  const proceedWithNavigation = () => {
+    if (!project?.link || isNavigating) return;
     const link = project.link;
-
-    startTransition(() => {
-      setIsNavigating(true);
-    });
-
+    setShowDisclaimer(false);
+    startTransition(() => setIsNavigating(true));
     clearNavigationTimeout();
-
     navigationTimeoutRef.current = setTimeout(() => {
       if (link.startsWith("/")) {
         router.push(link);
       } else {
-        window.location.assign(link);
+        window.open(link, "_blank", "noopener,noreferrer");
       }
     }, 50);
+  };
+
+  const handleNavigate = () => {
+    if (!project?.link || isNavigating || isValidating) return;
+    if (isUserLink) {
+      setShowDisclaimer(true);
+      return;
+    }
+    proceedWithNavigation();
   };
 
   const toggleSection = (section: SectionKey) => {
@@ -292,10 +317,12 @@ export default function ProjectOverlay({
 
   const screenshotUrl = useMemo(() => {
     if (!project?.link) return "";
+    // Static background image takes priority over a live microlink capture.
+    if (project.background) return project.background;
     return `https://api.microlink.io/?url=${encodeURIComponent(
       project.link,
     )}&screenshot=true&embed=screenshot.url`;
-  }, [project?.link]);
+  }, [project?.link, project?.background]);
 
   const hasLink = Boolean(project?.link);
   const isLinkWorking = Boolean(validation?.isWorking);
@@ -306,14 +333,55 @@ export default function ProjectOverlay({
       ? "loading"
       : !isLinkWorking
         ? "broken"
-        : isImageLoading
-          ? "loading"
-          : imageError
-            ? "broken"
-            : "ready";
+        : "ready";
 
   const isStatusActive = previewState === "ready";
   const isBrokenState = previewState === "broken";
+
+  const isHttps = Boolean(
+    project?.link?.startsWith("https://") ||
+      validation?.finalUrl?.startsWith("https://"),
+  );
+
+  const hasRedirect = Boolean(
+    validation?.finalUrl &&
+      project?.link &&
+      validation.finalUrl !== project.link,
+  );
+
+  // Only cross-domain redirects (e.g. google.com → evil.com) are suspicious.
+  // Same-domain redirects (www ↔ non-www, trailing slash) are routine and safe.
+  const hasCrossDomainRedirect = useMemo(() => {
+    if (!validation?.redirectChain || validation.redirectChain.length < 2) return false;
+    try {
+      const firstHost = new URL(validation.redirectChain[0]).hostname.replace(/^www\./, "");
+      const lastHost = new URL(validation.redirectChain[validation.redirectChain.length - 1]).hostname.replace(/^www\./, "");
+      return firstHost !== lastHost;
+    } catch {
+      return false;
+    }
+  }, [validation?.redirectChain]);
+
+  // Max achievable score is 85. Automated checks cannot guarantee content safety,
+  // so 100 is intentionally unreachable.
+  const trustScore: number | null = useMemo(() => {
+    if (!hasLink || isValidating || !validation) return null;
+    let score = 0;
+    if (isHttps) score += 30;
+    if (validation.isWorking) score += 25;
+    if (!hasCrossDomainRedirect) score += 15;
+    if (validation.statusCode === 200) score += 15;
+    return score; // max 85
+  }, [hasLink, isValidating, validation, isHttps, hasCrossDomainRedirect]);
+
+  const trustLevel =
+    trustScore === null
+      ? "SCANNING"
+      : trustScore >= 70
+        ? "HIGH"
+        : trustScore >= 45
+          ? "MEDIUM"
+          : "LOW";
 
   const projectCode =
     project?.slug && project?.domain
@@ -338,13 +406,6 @@ export default function ProjectOverlay({
         ? "CHECKING"
         : "DOWN";
 
-  const feedLabel =
-    previewState === "ready"
-      ? "ACTIVE"
-      : previewState === "loading"
-        ? "SYNCING"
-        : "OFFLINE";
-
   const recommendation =
     previewState === "ready"
       ? "OPEN PROJECT"
@@ -352,35 +413,63 @@ export default function ProjectOverlay({
         ? "ADD A VALID LINK"
         : "VERIFY ROUTE OR PAGE";
 
-  const diagnosticFlags =
-    previewState === "ready"
+  const diagnosticFlags: DiagnosticFlag[] =
+    previewState === "ready" && validation
       ? [
-          "LIVE PREVIEW AVAILABLE",
-          "SECURE SESSION HANDOFF",
-          "REMOTE TARGET VERIFIED",
-          "INTERCEPT LAYER ACTIVE",
+          {
+            label: isHttps ? "HTTPS: ENCRYPTED CONNECTION" : "HTTP: NO ENCRYPTION",
+            variant: isHttps ? "safe" : "danger",
+          },
+          {
+            label: `HTTP ${validation.statusCode ?? "---"}: ${validation.statusText ?? "OK"}`,
+            variant:
+              validation.statusCode === 200
+                ? "safe"
+                : validation.statusCode && validation.statusCode < 400
+                  ? "safe"
+                  : validation.statusCode && validation.statusCode < 500
+                    ? "warn"
+                    : "danger",
+          },
+          {
+            label: !hasRedirect
+              ? "NO REDIRECT DETECTED"
+              : hasCrossDomainRedirect
+                ? "CROSS-DOMAIN REDIRECT DETECTED"
+                : "SAME-DOMAIN REDIRECT (NORMAL)",
+            variant: !hasRedirect ? "safe" : hasCrossDomainRedirect ? "danger" : "warn",
+          },
+          {
+            label: validation.contentType
+              ? `TYPE: ${validation.contentType.split(";")[0].trim().toUpperCase()}`
+              : "CONTENT TYPE UNKNOWN",
+            variant: validation.contentType ? "neutral" : "warn",
+          },
         ]
       : previewState === "loading"
         ? [
-            "PREVIEW REQUEST QUEUED",
-            "ROUTE VALIDATION PENDING",
-            "REMOTE STATUS UNKNOWN",
-            "SESSION CHECK ACTIVE",
+            { label: "PREVIEW REQUEST QUEUED", variant: "neutral" },
+            { label: "ROUTE VALIDATION PENDING", variant: "neutral" },
+            { label: "REMOTE STATUS UNKNOWN", variant: "neutral" },
+            { label: "SESSION CHECK ACTIVE", variant: "neutral" },
           ]
         : previewState === "missing"
           ? [
-              "NO TARGET LINK PROVIDED",
-              "PREVIEW CAPTURE DISABLED",
-              "MANUAL ROUTE REQUIRED",
-              "PROJECT RECORD INCOMPLETE",
+              { label: "NO TARGET LINK PROVIDED", variant: "danger" },
+              { label: "PREVIEW CAPTURE DISABLED", variant: "warn" },
+              { label: "MANUAL ROUTE REQUIRED", variant: "warn" },
+              { label: "PROJECT RECORD INCOMPLETE", variant: "danger" },
             ]
           : [
-              "PREVIEW CAPTURE FAILED",
-              validation?.statusCode
-                ? `REMOTE RESPONSE ${validation.statusCode}`
-                : "POSSIBLE 404 OR DEAD ROUTE",
-              "REMOTE TARGET NOT VERIFIED",
-              "MANUAL CHECK RECOMMENDED",
+              { label: "PREVIEW CAPTURE FAILED", variant: "danger" },
+              {
+                label: validation?.statusCode
+                  ? `REMOTE RESPONSE ${validation.statusCode}`
+                  : "POSSIBLE 404 OR DEAD ROUTE",
+                variant: "danger",
+              },
+              { label: "REMOTE TARGET NOT VERIFIED", variant: "danger" },
+              { label: "MANUAL CHECK RECOMMENDED", variant: "warn" },
             ];
 
   const errorTitle =
@@ -400,6 +489,233 @@ export default function ProjectOverlay({
         : project?.link || "NO LINK AVAILABLE";
 
   if (animationState === "closed" || !project) return null;
+
+  // Showcase projects (lib/projects.ts) get a clean image + stats panel,
+  // not the security analysis UI.
+  if (!isUserLink) {
+    const showcaseImageSrc = project.background || project.image || "";
+    return createPortal(
+      <div
+        className={`threat-overlay-wrapper ${animationState === "open" ? "is-open" : ""} ${animationState === "closing" ? "is-closing" : ""} ${isNavigating ? "is-navigating" : ""}`}
+        onClick={animationState === "open" && !isNavigating ? onClose : undefined}
+      >
+        <div className="threat-overlay-backdrop" />
+        <div
+          className="threat-overlay-panel"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${project.title} showcase`}
+        >
+          <div className="scan-line" />
+          <div className="glow-effect" />
+          <div className="grid-overlay" />
+
+          <div className="threat-header">
+            <div className="threat-title-section">
+              <span className="threat-badge">SHOWCASE</span>
+              <div className="threat-title-stack">
+                <span className="threat-code">{projectCode}</span>
+                <h2 className="threat-main-title">{project.title}</h2>
+              </div>
+            </div>
+            <button
+              className="threat-close"
+              onClick={onClose}
+              disabled={isNavigating}
+              aria-label="Close overlay"
+              type="button"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="threat-content">
+            {/* Left — image */}
+            <div className="threat-image-panel">
+              <div className="image-container">
+                {showcaseImageSrc ? (
+                  <>
+                    {isImageLoading && !imageError && (
+                      <div className="screenshot-loading">
+                        <div className="preview-status-badge">PREVIEW</div>
+                        <div className="loading-spinner" />
+                      </div>
+                    )}
+                    {imageError && (
+                      <div className="screenshot-loading is-error">
+                        <div className="preview-status-badge">PREVIEW</div>
+                        <div className="error-icon" style={{ fontSize: "22px" }}>⊘</div>
+                        <span>IMAGE UNAVAILABLE</span>
+                      </div>
+                    )}
+                    <img
+                      src={showcaseImageSrc}
+                      alt={project.title}
+                      className="threat-image"
+                      style={{ display: !isImageLoading && !imageError ? "block" : "none" }}
+                      onLoad={() => { setIsImageLoading(false); setImageError(false); }}
+                      onError={() => { setImageError(true); setIsImageLoading(false); }}
+                    />
+                  </>
+                ) : (
+                  <div className="screenshot-loading is-error">
+                    <div className="preview-status-badge">SHOWCASE</div>
+                    <div className="error-icon" style={{ fontSize: "22px" }}>⊘</div>
+                    <span>NO PREVIEW AVAILABLE</span>
+                  </div>
+                )}
+
+                <div className="image-data-overlay">
+                  <div className="data-tag">
+                    <span className="dot" />
+                    <span>SHOWCASE</span>
+                  </div>
+                  <div className="image-caption">
+                    <span className="image-caption-label">TYPE</span>
+                    <span className="image-caption-value">
+                      {project.cardSubtitle ?? cardDescription(project)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="quick-stats">
+                <div className="stat-card">
+                  <span className="stat-label">DOMAIN</span>
+                  <span className="stat-value online">{project.domain ?? "—"}</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">CATEGORY</span>
+                  <span className="stat-value">{project.cardSubtitle ?? "PROJECT"}</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-label">STATUS</span>
+                  <span className="stat-value online">ACTIVE</span>
+                </div>
+              </div>
+
+              {project.link ? (
+                <button
+                  className="threat-enter-link is-safe"
+                  onClick={() =>
+                    window.open(project.link!, "_blank", "noopener,noreferrer")
+                  }
+                  disabled={isNavigating}
+                  type="button"
+                >
+                  VISIT PROJECT ↗
+                </button>
+              ) : (
+                <button
+                  className="threat-enter-link is-disabled-look"
+                  disabled
+                  type="button"
+                >
+                  LINK REQUIRED
+                </button>
+              )}
+            </div>
+
+            {/* Right — project stats */}
+            <div className="threat-data-panel">
+              <div className="hero-summary">
+                <span className="hero-summary-kicker">ABOUT THIS PROJECT</span>
+                <p className="hero-summary-text">{overlayDescription(project)}</p>
+                {project.extra && (
+                  <p
+                    className="hero-summary-text"
+                    style={{ marginTop: 10, color: "rgba(245, 247, 251, 0.6)" }}
+                  >
+                    {project.extra}
+                  </p>
+                )}
+              </div>
+
+              <div className="data-section">
+                <div className="section-header">
+                  <span className="section-title-wrap">
+                    <span className="section-icon">◆</span>
+                    <span className="section-title">PROJECT DETAILS</span>
+                  </span>
+                </div>
+                <div className="section-body">
+                  <div className="data-grid-2col">
+                    <div className="data-field">
+                      <span className="field-label">TITLE</span>
+                      <span className="field-value">{project.cardTitle}</span>
+                    </div>
+                    <div className="data-field">
+                      <span className="field-label">TYPE</span>
+                      <span className="field-value">{project.cardSubtitle ?? "—"}</span>
+                    </div>
+                    <div className="data-field">
+                      <span className="field-label">DOMAIN</span>
+                      <span className="field-value mono">{project.domain ?? "—"}</span>
+                    </div>
+                    <div className="data-field">
+                      <span className="field-label">LINK</span>
+                      <span className="field-value mono">{project.link ?? "—"}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {project.attribute && (
+                <div className="data-section">
+                  <div className="section-header">
+                    <span className="section-title-wrap">
+                      <span className="section-icon">◆</span>
+                      <span className="section-title">CARD IMAGE CREDIT</span>
+                    </span>
+                  </div>
+                  <div className="section-body">
+                    <div className="data-grid-2col">
+                      <div className="data-field">
+                        <span className="field-label">ARTIST</span>
+                        <span className="field-value">
+                          {project.attribute.artistName}
+                        </span>
+                      </div>
+                      <div className="data-field">
+                        <span className="field-label">PLATFORM</span>
+                        <span className="field-value">
+                          {project.attribute.artistPlatform}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="data-stream">
+                <span className="stream-text">SHOWCASE_MODE_ACTIVE</span>
+                <span className="stream-dots">●●●</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="threat-footer">
+            <div className="footer-left">
+              <span className="dot" />
+              <span>CURATED PROJECT</span>
+            </div>
+            <div className="footer-right">
+              <span>{project.domain ?? "LINDOCODE"}</span>
+              <span>|</span>
+              <span>SHOWCASE</span>
+            </div>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
+
+  let checkHostname = "";
+  try {
+    if (project.link) checkHostname = new URL(project.link).hostname;
+  } catch {}
 
   return createPortal(
     <div
@@ -426,6 +742,32 @@ export default function ProjectOverlay({
         <div className="threat-header">
           <div className="threat-title-section">
             <span className="threat-badge">LIVE PREVIEW</span>
+            {!isValidating && hasLink && trustScore !== null && (
+              <span
+                className="threat-badge"
+                style={
+                  trustLevel === "HIGH"
+                    ? {
+                        borderColor: "rgba(78, 200, 120, 0.45)",
+                        background: "rgba(78, 200, 120, 0.12)",
+                        color: "#a5ffb4",
+                      }
+                    : trustLevel === "MEDIUM"
+                      ? {
+                          borderColor: "rgba(255, 196, 107, 0.45)",
+                          background: "rgba(255, 196, 107, 0.12)",
+                          color: "#ffd6a1",
+                        }
+                      : {
+                          borderColor: "rgba(255, 123, 114, 0.45)",
+                          background: "rgba(255, 123, 114, 0.12)",
+                          color: "#ffb4ac",
+                        }
+                }
+              >
+                TRUST: {trustScore}/85
+              </span>
+            )}
             <div className="threat-title-stack">
               <span className="threat-code">{projectCode}</span>
               <h2 className="threat-main-title">{project.title}</h2>
@@ -450,6 +792,7 @@ export default function ProjectOverlay({
                 isBrokenState ? "is-broken-preview" : ""
               } ${previewState === "missing" ? "is-missing-preview" : ""}`}
             >
+              {/* Validation states: still checking / link down / no link */}
               {(previewState === "loading" ||
                 previewState === "broken" ||
                 previewState === "missing") && (
@@ -477,13 +820,42 @@ export default function ProjectOverlay({
                 </div>
               )}
 
+              {/* Link verified — screenshot capturing */}
+              {previewState === "ready" && isImageLoading && (
+                <div className="screenshot-loading">
+                  <div className="preview-status-badge">LIVE FEED</div>
+                  <div className="loading-spinner" />
+                  <span>CAPTURING LIVE PREVIEW</span>
+                  <span className="loading-url">{project?.link}</span>
+                </div>
+              )}
+
+              {/* Link verified — screenshot blocked/unavailable */}
+              {previewState === "ready" && !isImageLoading && imageError && (
+                <div className="screenshot-loading is-error">
+                  <div className="preview-status-badge">PREVIEW</div>
+                  <div className="error-icon" style={{ fontSize: "22px" }}>
+                    ⊘
+                  </div>
+                  <span>SCREENSHOT UNAVAILABLE</span>
+                  <span className="loading-url">
+                    Link verified — preview blocked or restricted
+                  </span>
+                </div>
+              )}
+
               {hasLink && isLinkWorking && (
                 <img
                   src={screenshotUrl}
                   alt={project.title}
                   className="threat-image"
                   style={{
-                    display: previewState === "ready" ? "block" : "none",
+                    display:
+                      previewState === "ready" &&
+                      !isImageLoading &&
+                      !imageError
+                        ? "block"
+                        : "none",
                   }}
                   onLoad={() => {
                     setIsImageLoading(false);
@@ -514,9 +886,11 @@ export default function ProjectOverlay({
                     }
                   />
                   <span>
-                    {previewState === "ready"
-                      ? "LIVE FEED"
-                      : previewState === "loading"
+                    {previewState === "ready" && !isImageLoading
+                      ? imageError
+                        ? "PREVIEW"
+                        : "LIVE FEED"
+                      : previewState === "loading" || isImageLoading
                         ? "CHECKING"
                         : "ALERT"}
                   </span>
@@ -548,20 +922,34 @@ export default function ProjectOverlay({
               </div>
 
               <div className="stat-card">
-                <span className="stat-label">PRIORITY</span>
-                <span className="stat-value">
-                  {previewState === "ready" ? "ALPHA" : "REVIEW"}
+                <span className="stat-label">HTTPS</span>
+                <span
+                  className={`stat-value ${
+                    isHttps && previewState === "ready" ? "online" : "offline"
+                  }`}
+                >
+                  {isValidating
+                    ? "CHECKING"
+                    : isHttps
+                      ? "SECURE"
+                      : hasLink
+                        ? "NONE"
+                        : "N/A"}
                 </span>
               </div>
 
               <div className="stat-card">
-                <span className="stat-label">FEED</span>
+                <span className="stat-label">TRUST SCORE</span>
                 <span
                   className={`stat-value ${
-                    isStatusActive ? "online" : "offline"
+                    trustScore !== null && trustScore >= 70 ? "online" : "offline"
                   }`}
                 >
-                  {feedLabel}
+                  {isValidating
+                    ? "SCANNING"
+                    : trustScore !== null
+                      ? `${trustScore}/85`
+                      : "N/A"}
                 </span>
               </div>
             </div>
@@ -569,7 +957,7 @@ export default function ProjectOverlay({
             {hasLink ? (
               <button
                 className={`threat-enter-link ${
-                  previewState !== "ready" ? "is-warning" : ""
+                  previewState === "ready" ? "is-safe" : "is-warning"
                 }`}
                 onClick={handleNavigate}
                 disabled={isNavigating || isValidating}
@@ -604,15 +992,15 @@ export default function ProjectOverlay({
 
           <div className="threat-data-panel">
             <div className="hero-summary">
-              <span className="hero-summary-kicker">MISSION SUMMARY</span>
+              <span className="hero-summary-kicker">LINK ANALYSIS</span>
               <p className="hero-summary-text">
                 {previewState === "ready"
-                  ? "Secure project preview channel established. Review target status, live route availability, and access readiness before deployment."
+                  ? `Trust score ${trustScore ?? 0}/85 — review the safety flags and redirect data below before opening this link.`
                   : previewState === "loading"
-                    ? "Preview capture is still syncing. Route validation is in progress and access status is being checked."
+                    ? "Real-time analysis in progress. Scanning the link for safety signals, HTTPS status, and redirect chains."
                     : previewState === "missing"
-                      ? "This project does not currently include a live link, so preview and direct access cannot be verified."
-                      : "The target route failed validation. This usually means the route is invalid, the page returns 404, the host is unavailable, or the remote page is blocking access."}
+                      ? "No link provided for this project. Preview and safety checks cannot run without a target URL."
+                      : "Link validation failed. The target may be unreachable, returning an error, or blocking automated access. Check the safety flags for details."}
               </p>
             </div>
 
@@ -627,7 +1015,7 @@ export default function ProjectOverlay({
               >
                 <span className="section-title-wrap">
                   <span className="section-icon">◆</span>
-                  <span className="section-title">SUBJECT IDENTIFICATION</span>
+                  <span className="section-title">LINK IDENTIFICATION</span>
                 </span>
                 <span className="section-chevron">
                   {openSection === "overview" ? "−" : "+"}
@@ -668,6 +1056,49 @@ export default function ProjectOverlay({
                           "NO LINK AVAILABLE"}
                       </span>
                     </div>
+
+                    <div className="data-field">
+                      <span className="field-label">HTTPS</span>
+                      <span
+                        className={`field-value ${isHttps ? "status-ready" : "offline"}`}
+                      >
+                        {isHttps ? "SECURE ✓" : "NOT SECURE"}
+                      </span>
+                    </div>
+
+                    <div className="data-field">
+                      <span className="field-label">REDIRECT</span>
+                      <span className="field-value mono">
+                        {isValidating
+                          ? "CHECKING..."
+                          : !hasRedirect
+                            ? "NONE DETECTED"
+                            : hasCrossDomainRedirect
+                              ? `CROSS-DOMAIN → ${(validation?.finalUrl ?? "").slice(0, 24)}…`
+                              : `SAME-DOMAIN → ${(validation?.finalUrl ?? "").slice(0, 25)}…`}
+                      </span>
+                    </div>
+
+                    {validation?.responseTime !== undefined && (
+                      <div className="data-field">
+                        <span className="field-label">RESPONSE</span>
+                        <span
+                          className={`field-value ${
+                            validation.responseTime < 1000
+                              ? "status-ready"
+                              : validation.responseTime < 3000
+                                ? ""
+                                : "offline"
+                          }`}
+                        >
+                          {validation.responseTime < 1000
+                            ? `${validation.responseTime}ms ✓`
+                            : validation.responseTime < 3000
+                              ? `${validation.responseTime}ms`
+                              : `${(validation.responseTime / 1000).toFixed(1)}s SLOW`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -684,7 +1115,7 @@ export default function ProjectOverlay({
               >
                 <span className="section-title-wrap">
                   <span className="section-icon">◆</span>
-                  <span className="section-title">DIAGNOSTIC FLAGS</span>
+                  <span className="section-title">SAFETY FLAGS</span>
                 </span>
                 <span className="section-chevron">
                   {openSection === "diagnostics" ? "−" : "+"}
@@ -695,14 +1126,59 @@ export default function ProjectOverlay({
                 <div className="section-body">
                   <div className="flags-list">
                     {diagnosticFlags.map((flag) => (
-                      <span className="flag" key={flag}>
-                        {flag}
+                      <span className={`flag flag-${flag.variant}`} key={flag.label}>
+                        {flag.label}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
             </div>
+
+            {validation?.redirectChain && validation.redirectChain.length > 1 && (
+              <div className="data-section">
+                <button
+                  type="button"
+                  className={`section-header clickable ${
+                    openSection === "redirects" ? "active" : ""
+                  }`}
+                  onClick={() => toggleSection("redirects")}
+                  aria-expanded={openSection === "redirects"}
+                >
+                  <span className="section-title-wrap">
+                    <span className="section-icon" style={{ color: "#fde047" }}>◆</span>
+                    <span className="section-title">REDIRECT CHAIN</span>
+                  </span>
+                  <span className="section-chevron">
+                    {openSection === "redirects" ? "−" : "+"}
+                  </span>
+                </button>
+
+                {openSection === "redirects" && (
+                  <div className="section-body">
+                    <div className="redirect-chain">
+                      {validation.redirectChain.map((hopUrl, i) => (
+                        <div key={i} className="redirect-step">
+                          <span className="redirect-step-index">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <span
+                            className={`redirect-step-url ${
+                              i === validation.redirectChain!.length - 1 ? "is-final" : ""
+                            }`}
+                          >
+                            {hopUrl}
+                          </span>
+                          {i < validation.redirectChain!.length - 1 && (
+                            <span className="redirect-arrow">↓</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="data-section">
               <button
@@ -715,7 +1191,7 @@ export default function ProjectOverlay({
               >
                 <span className="section-title-wrap">
                   <span className="section-icon">◆</span>
-                  <span className="section-title">CONCLUSION & ACTION</span>
+                  <span className="section-title">VERDICT & ACTION</span>
                 </span>
                 <span className="section-chevron">
                   {openSection === "recommendation" ? "−" : "+"}
@@ -798,6 +1274,155 @@ export default function ProjectOverlay({
             <span>ID: 8472-AA</span>
           </div>
         </div>
+
+        {/* Safety disclaimer — shown on open-click for user-submitted links */}
+        {showDisclaimer && (
+          <div className="safety-disclaimer-overlay">
+            <div
+              className="safety-disclaimer-panel"
+              style={{
+                borderColor:
+                  trustLevel === "HIGH"
+                    ? "rgba(234, 179, 8, 0.45)"
+                    : trustLevel === "MEDIUM"
+                      ? "rgba(251, 146, 60, 0.45)"
+                      : "rgba(239, 68, 68, 0.45)",
+                boxShadow:
+                  trustLevel === "HIGH"
+                    ? "0 0 50px rgba(234, 179, 8, 0.14), 0 28px 64px rgba(0,0,0,0.65)"
+                    : trustLevel === "MEDIUM"
+                      ? "0 0 50px rgba(251, 146, 60, 0.14), 0 28px 64px rgba(0,0,0,0.65)"
+                      : "0 0 50px rgba(239, 68, 68, 0.14), 0 28px 64px rgba(0,0,0,0.65)",
+              }}
+            >
+              {/* X — dismiss without navigating */}
+              <button
+                className="safety-disclaimer-close"
+                onClick={() => setShowDisclaimer(false)}
+                type="button"
+                aria-label="Cancel"
+              >
+                ✕
+              </button>
+
+              <span
+                className="safety-disclaimer-icon"
+                aria-hidden="true"
+                style={{
+                  color:
+                    trustLevel === "HIGH"
+                      ? "#fde047"
+                      : trustLevel === "MEDIUM"
+                        ? "#fb923c"
+                        : "#f87171",
+                }}
+              >
+                ⚠
+              </span>
+
+              <div className="safety-disclaimer-score">
+                TRUST SCORE&nbsp;&nbsp;
+                <span
+                  style={{
+                    color:
+                      trustLevel === "HIGH"
+                        ? "#a5ffb4"
+                        : trustLevel === "MEDIUM"
+                          ? "#fde047"
+                          : "#ffd6d5",
+                  }}
+                >
+                  {trustScore}/85
+                </span>
+                &nbsp;&nbsp;·&nbsp;&nbsp;{trustLevel}
+              </div>
+
+              <p className="safety-disclaimer-text">
+                Score is capped at&nbsp;<strong>85</strong> by design.
+                Automated checks cover HTTPS, reachability, and redirect
+                patterns only — they cannot assess content, intent, or
+                legitimacy. Verify the link independently before proceeding.
+              </p>
+
+              {/* Third-party verification services */}
+              <div className="safety-verify-section">
+                <span className="safety-verify-label">VERIFY INDEPENDENTLY</span>
+                <div className="safety-verify-links">
+                  <a
+                    href={`https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(project.link ?? "")}&hl=en`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="safety-verify-link"
+                  >
+                    Google Safe Browsing ↗
+                  </a>
+                  <a
+                    href="https://www.virustotal.com/gui/home/url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="safety-verify-link"
+                  >
+                    VirusTotal ↗
+                  </a>
+                  <a
+                    href={`https://www.urlvoid.com/scan/${checkHostname}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="safety-verify-link"
+                  >
+                    URLVoid ↗
+                  </a>
+                  <a
+                    href={`https://who.is/whois/${checkHostname}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="safety-verify-link"
+                  >
+                    WHOIS Lookup ↗
+                  </a>
+                </div>
+              </div>
+
+              <div className="safety-disclaimer-actions">
+                <button
+                  className="safety-disclaimer-btn"
+                  onClick={proceedWithNavigation}
+                  type="button"
+                  style={{
+                    borderColor:
+                      trustLevel === "HIGH"
+                        ? "rgba(234, 179, 8, 0.55)"
+                        : trustLevel === "MEDIUM"
+                          ? "rgba(251, 146, 60, 0.55)"
+                          : "rgba(239, 68, 68, 0.55)",
+                    color:
+                      trustLevel === "HIGH"
+                        ? "#fde047"
+                        : trustLevel === "MEDIUM"
+                          ? "#fb923c"
+                          : "#f87171",
+                    background:
+                      trustLevel === "HIGH"
+                        ? "linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(234, 179, 8, 0.06))"
+                        : trustLevel === "MEDIUM"
+                          ? "linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(251, 146, 60, 0.06))"
+                          : "linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.06))",
+                  }}
+                >
+                  OPEN IN NEW TAB ↗
+                </button>
+
+                <button
+                  className="safety-disclaimer-cancel"
+                  onClick={() => setShowDisclaimer(false)}
+                  type="button"
+                >
+                  Cancel — go back
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>,
     document.body,

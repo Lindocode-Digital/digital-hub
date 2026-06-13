@@ -2,6 +2,7 @@ import CompanyName from "@/components/common/CompanyName";
 import Banner from "@/components/common/Banner";
 import Footer from "@/components/common/Footer";
 import CarouselShell from "./carousel/CarouselShell";
+import LinkChecker from "./LinkChecker";
 import { projects } from "@/lib/projects";
 
 export default function LandingPage() {
@@ -15,8 +16,9 @@ export default function LandingPage() {
           lg:px-8 lg:py-6 lg:gap-6
         "
       >
-        <div className="flex-shrink-0 -mb-5 md:-mb-3 lg:-mb-4">
+        <div className="flex-shrink-0 flex flex-col items-center gap-7 sm:gap-6 md:gap-5">
           <CompanyName />
+          <LinkChecker />
         </div>
 
         <div

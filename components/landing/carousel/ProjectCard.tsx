@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
 import type { Project } from "@/lib/projects";
+import { cardDescription } from "@/lib/projects";
 import "./ProjectCard.css";
 
 type ProjectCardProps = {
@@ -71,7 +72,7 @@ export default function ProjectCard({
           <div className="flex flex-1 flex-col justify-between gap-3 p-3 sm:p-4">
             <div className="space-y-1">
               <p className="text-center text-[clamp(0.75rem,1.8vw,1rem)] font-medium leading-snug text-neutral-800">
-                {project.description}
+                {cardDescription(project)}
               </p>
 
               {project.cardSubtitle && (
