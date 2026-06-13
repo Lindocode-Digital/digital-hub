@@ -45,7 +45,7 @@ export const projects: Project[] = [
     cardSubtitle: "Writing",
     description: "Art of Storytelling",
     image:
-      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards6.webp",
+      "https://picsum.photos/seed/sdrowvieli-writing/800/534",
     background: "",
     color: "",
     link: "https://sdrowvieli.lindocode.com",
@@ -68,7 +68,7 @@ export const projects: Project[] = [
     cardSubtitle: "Fullstack",
     description: "Web|Mobile Developer",
     image:
-      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards7.webp",
+      "https://picsum.photos/seed/lindocode-portfolio/800/534",
     background: "",
     color: "",
     link: "https://portfolio.lindocode.com",
@@ -91,7 +91,7 @@ export const projects: Project[] = [
     description: "Tech Solutions",
     extra: "Effortless tech, maximum ease.",
     image:
-      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards.webp",
+      "https://picsum.photos/seed/lindocode-digital-tech/800/534",
     background: "",
     color: "",
     link: "https://lindocode.com",
@@ -114,7 +114,7 @@ export const projects: Project[] = [
     cardSubtitle: "Mobile",
     description: "Reading Experience",
     image:
-      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/cards9.webp",
+      "https://picsum.photos/seed/lazyreader-books-mobile/800/534",
     background: "",
     color: "",
     link: "https://lazyreader.lindocode.com",
@@ -137,7 +137,7 @@ export const projects: Project[] = [
     cardSubtitle: "Projects",
     description: "Web & Mobile Apps",
     image:
-      "https://dawn-unit-97b0.sdrowvieli1.workers.dev/creativehub/images/cards/projects.webp",
+      "https://picsum.photos/seed/lindocode-showcase-apps/800/534",
     background: "",
     color: "",
     link: "https://lindocode.com/projects",

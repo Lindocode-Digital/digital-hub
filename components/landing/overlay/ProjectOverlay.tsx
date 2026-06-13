@@ -35,7 +35,7 @@ type ValidationResult = {
   link?: string;
 };
 
-const VALIDATION_ENDPOINT = "https://dawn-violet-bb5b.sdrowvieli1.workers.dev";
+const VALIDATION_ENDPOINT = "/digitalhub/api/validate";
 
 export default function ProjectOverlay({
   project,
@@ -226,7 +226,7 @@ export default function ProjectOverlay({
 
       try {
         const response = await fetch(
-          `${VALIDATION_ENDPOINT}/?action=validate&url=${encodeURIComponent(project.link ?? "")}`,
+          `${VALIDATION_ENDPOINT}?url=${encodeURIComponent(project.link ?? "")}`,
           { signal: controller.signal },
         );
 
@@ -315,6 +315,36 @@ export default function ProjectOverlay({
   const isStatusActive = previewState === "ready";
   const isBrokenState = previewState === "broken";
 
+  const isHttps = Boolean(
+    project?.link?.startsWith("https://") ||
+      validation?.finalUrl?.startsWith("https://"),
+  );
+
+  const hasRedirect = Boolean(
+    validation?.finalUrl &&
+      project?.link &&
+      validation.finalUrl !== project.link,
+  );
+
+  const trustScore: number | null = useMemo(() => {
+    if (!hasLink || isValidating || !validation) return null;
+    let score = 0;
+    if (isHttps) score += 35;
+    if (validation.isWorking) score += 30;
+    if (!hasRedirect) score += 20;
+    if (validation.statusCode === 200) score += 15;
+    return Math.min(score, 100);
+  }, [hasLink, isValidating, validation, isHttps, hasRedirect]);
+
+  const trustLevel =
+    trustScore === null
+      ? "SCANNING"
+      : trustScore >= 80
+        ? "HIGH"
+        : trustScore >= 50
+          ? "MEDIUM"
+          : "LOW";
+
   const projectCode =
     project?.slug && project?.domain
       ? `PROJECT LINK: ${project.domain.toUpperCase()}${project.slug.toUpperCase()}`
@@ -338,13 +368,6 @@ export default function ProjectOverlay({
         ? "CHECKING"
         : "DOWN";
 
-  const feedLabel =
-    previewState === "ready"
-      ? "ACTIVE"
-      : previewState === "loading"
-        ? "SYNCING"
-        : "OFFLINE";
-
   const recommendation =
     previewState === "ready"
       ? "OPEN PROJECT"
@@ -353,12 +376,14 @@ export default function ProjectOverlay({
         : "VERIFY ROUTE OR PAGE";
 
   const diagnosticFlags =
-    previewState === "ready"
+    previewState === "ready" && validation
       ? [
-          "LIVE PREVIEW AVAILABLE",
-          "SECURE SESSION HANDOFF",
-          "REMOTE TARGET VERIFIED",
-          "INTERCEPT LAYER ACTIVE",
+          isHttps ? "HTTPS: ENCRYPTED CONNECTION" : "HTTP: NO ENCRYPTION",
+          `HTTP ${validation.statusCode ?? "---"}: ${validation.statusText ?? "OK"}`,
+          hasRedirect ? "REDIRECT DETECTED IN CHAIN" : "NO REDIRECT DETECTED",
+          validation.contentType
+            ? `TYPE: ${validation.contentType.split(";")[0].trim().toUpperCase()}`
+            : "CONTENT TYPE UNKNOWN",
         ]
       : previewState === "loading"
         ? [
@@ -426,6 +451,32 @@ export default function ProjectOverlay({
         <div className="threat-header">
           <div className="threat-title-section">
             <span className="threat-badge">LIVE PREVIEW</span>
+            {!isValidating && hasLink && trustScore !== null && (
+              <span
+                className="threat-badge"
+                style={
+                  trustLevel === "HIGH"
+                    ? {
+                        borderColor: "rgba(78, 200, 120, 0.45)",
+                        background: "rgba(78, 200, 120, 0.12)",
+                        color: "#a5ffb4",
+                      }
+                    : trustLevel === "MEDIUM"
+                      ? {
+                          borderColor: "rgba(255, 196, 107, 0.45)",
+                          background: "rgba(255, 196, 107, 0.12)",
+                          color: "#ffd6a1",
+                        }
+                      : {
+                          borderColor: "rgba(255, 123, 114, 0.45)",
+                          background: "rgba(255, 123, 114, 0.12)",
+                          color: "#ffb4ac",
+                        }
+                }
+              >
+                TRUST: {trustScore}%
+              </span>
+            )}
             <div className="threat-title-stack">
               <span className="threat-code">{projectCode}</span>
               <h2 className="threat-main-title">{project.title}</h2>
@@ -548,20 +599,34 @@ export default function ProjectOverlay({
               </div>
 
               <div className="stat-card">
-                <span className="stat-label">PRIORITY</span>
-                <span className="stat-value">
-                  {previewState === "ready" ? "ALPHA" : "REVIEW"}
+                <span className="stat-label">HTTPS</span>
+                <span
+                  className={`stat-value ${
+                    isHttps && previewState === "ready" ? "online" : "offline"
+                  }`}
+                >
+                  {isValidating
+                    ? "CHECKING"
+                    : isHttps
+                      ? "SECURE"
+                      : hasLink
+                        ? "NONE"
+                        : "N/A"}
                 </span>
               </div>
 
               <div className="stat-card">
-                <span className="stat-label">FEED</span>
+                <span className="stat-label">TRUST SCORE</span>
                 <span
                   className={`stat-value ${
-                    isStatusActive ? "online" : "offline"
+                    trustScore !== null && trustScore >= 80 ? "online" : "offline"
                   }`}
                 >
-                  {feedLabel}
+                  {isValidating
+                    ? "SCANNING"
+                    : trustScore !== null
+                      ? `${trustScore}%`
+                      : "N/A"}
                 </span>
               </div>
             </div>
@@ -604,15 +669,15 @@ export default function ProjectOverlay({
 
           <div className="threat-data-panel">
             <div className="hero-summary">
-              <span className="hero-summary-kicker">MISSION SUMMARY</span>
+              <span className="hero-summary-kicker">LINK ANALYSIS</span>
               <p className="hero-summary-text">
                 {previewState === "ready"
-                  ? "Secure project preview channel established. Review target status, live route availability, and access readiness before deployment."
+                  ? "Live preview confirmed. Trust indicators verified. Review the safety flags and link metadata before navigating to the target."
                   : previewState === "loading"
-                    ? "Preview capture is still syncing. Route validation is in progress and access status is being checked."
+                    ? "Real-time analysis in progress. Scanning the link for safety signals, HTTPS status, and redirect chains."
                     : previewState === "missing"
-                      ? "This project does not currently include a live link, so preview and direct access cannot be verified."
-                      : "The target route failed validation. This usually means the route is invalid, the page returns 404, the host is unavailable, or the remote page is blocking access."}
+                      ? "No link provided for this project. Preview and safety checks cannot run without a target URL."
+                      : "Link validation failed. The target may be unreachable, returning an error, or blocking automated access. Check the safety flags for details."}
               </p>
             </div>
 
@@ -627,7 +692,7 @@ export default function ProjectOverlay({
               >
                 <span className="section-title-wrap">
                   <span className="section-icon">◆</span>
-                  <span className="section-title">SUBJECT IDENTIFICATION</span>
+                  <span className="section-title">LINK IDENTIFICATION</span>
                 </span>
                 <span className="section-chevron">
                   {openSection === "overview" ? "−" : "+"}
@@ -668,6 +733,26 @@ export default function ProjectOverlay({
                           "NO LINK AVAILABLE"}
                       </span>
                     </div>
+
+                    <div className="data-field">
+                      <span className="field-label">HTTPS</span>
+                      <span
+                        className={`field-value ${isHttps ? "status-ready" : "offline"}`}
+                      >
+                        {isHttps ? "SECURE ✓" : "NOT SECURE"}
+                      </span>
+                    </div>
+
+                    <div className="data-field">
+                      <span className="field-label">REDIRECT</span>
+                      <span className="field-value mono">
+                        {isValidating
+                          ? "CHECKING..."
+                          : hasRedirect
+                            ? `YES → ${(validation?.finalUrl ?? "").slice(0, 30)}…`
+                            : "NONE DETECTED"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -684,7 +769,7 @@ export default function ProjectOverlay({
               >
                 <span className="section-title-wrap">
                   <span className="section-icon">◆</span>
-                  <span className="section-title">DIAGNOSTIC FLAGS</span>
+                  <span className="section-title">SAFETY FLAGS</span>
                 </span>
                 <span className="section-chevron">
                   {openSection === "diagnostics" ? "−" : "+"}
@@ -715,7 +800,7 @@ export default function ProjectOverlay({
               >
                 <span className="section-title-wrap">
                   <span className="section-icon">◆</span>
-                  <span className="section-title">CONCLUSION & ACTION</span>
+                  <span className="section-title">VERDICT & ACTION</span>
                 </span>
                 <span className="section-chevron">
                   {openSection === "recommendation" ? "−" : "+"}

@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "Digital Hub is a centralized, elegant platform for showcasing creative work or projects. Built to be as intuitive to navigate as it is powerful to experience.",
+    "Digital Hub gives you real-time link insights and safety checks before you click. Instant live previews, HTTPS detection, redirect analysis, and trust scoring — all in one place.",
 
   alternates: {
     canonical: "https://lindocode.com/digitalhub",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Digital Hub | Lindocode Digital",
     description:
-      "Digital Hub is a centralized, elegant platform for showcasing creative work or projects. Built to be as intuitive to navigate as it is powerful to experience.",
+      "Digital Hub gives you real-time link insights and safety checks before you click. Instant live previews, HTTPS detection, redirect analysis, and trust scoring — all in one place.",
     url: "https://lindocode.com/digitalhub",
     siteName: "Lindocode Digital",
     images: [
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Digital Hub | Lindocode Digital",
     description:
-      "Digital Hub is a centralized, elegant platform for showcasing creative work or projects. Built to be as intuitive to navigate as it is powerful to experience.",
+      "Digital Hub gives you real-time link insights and safety checks before you click. Instant live previews, HTTPS detection, redirect analysis, and trust scoring — all in one place.",
     images: ["https://lindocode.com/digitalhub/og-image.jpg"],
   },
 

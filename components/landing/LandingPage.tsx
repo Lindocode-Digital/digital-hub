@@ -2,6 +2,7 @@ import CompanyName from "@/components/common/CompanyName";
 import Banner from "@/components/common/Banner";
 import Footer from "@/components/common/Footer";
 import CarouselShell from "./carousel/CarouselShell";
+import LinkChecker from "./LinkChecker";
 import { projects } from "@/lib/projects";
 
 export default function LandingPage() {
@@ -19,6 +20,10 @@ export default function LandingPage() {
           <CompanyName />
         </div>
 
+        <div className="flex-shrink-0">
+          <LinkChecker />
+        </div>
+
         <div
           className="
             flex flex-1 items-center justify-center
@@ -31,7 +36,11 @@ export default function LandingPage() {
         </div>
 
         <div className="flex-shrink-0">
-          <Banner />
+          <Banner
+            textLeft="INSPECT."
+            textMiddle="VERIFY."
+            textRight="ACCESS."
+          />
         </div>
 
         <div className="flex-shrink-0">
