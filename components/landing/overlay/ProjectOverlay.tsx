@@ -11,6 +11,7 @@ import {
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/lib/projects";
+import { cardDescription, overlayDescription } from "@/lib/projects";
 import "./ProjectOverlay.css";
 
 type ProjectOverlayProps = {
@@ -573,7 +574,7 @@ export default function ProjectOverlay({
                   <div className="image-caption">
                     <span className="image-caption-label">TYPE</span>
                     <span className="image-caption-value">
-                      {project.cardSubtitle ?? project.description}
+                      {project.cardSubtitle ?? cardDescription(project)}
                     </span>
                   </div>
                 </div>
@@ -620,7 +621,7 @@ export default function ProjectOverlay({
             <div className="threat-data-panel">
               <div className="hero-summary">
                 <span className="hero-summary-kicker">ABOUT THIS PROJECT</span>
-                <p className="hero-summary-text">{project.description}</p>
+                <p className="hero-summary-text">{overlayDescription(project)}</p>
                 {project.extra && (
                   <p
                     className="hero-summary-text"

@@ -2,6 +2,7 @@
 
 import { useState, type CSSProperties } from "react";
 import type { Project } from "@/lib/projects";
+import { cardDescription } from "@/lib/projects";
 import "./CoverFlowCard.css";
 
 type CoverIcon = {
@@ -16,7 +17,7 @@ type CoverItem = Project & {
   "card-title"?: string;
   cardTitle?: string;
   cardSubtitle?: string;
-  description?: string;
+  description?: string | [string, string];
   extra?: string;
   icons?: CoverIcon[];
   indexLabel?: string;
@@ -45,7 +46,7 @@ export default function CoverFlowCard({
 
   const displayTitle = cover.cardTitle ?? cover["card-title"] ?? cover.title;
   const displaySubtitle = cover.cardSubtitle;
-  const displayDescription = cover.description;
+  const displayDescription = cardDescription(cover);
 
   return (
     <div
