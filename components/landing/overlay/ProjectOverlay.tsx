@@ -19,7 +19,7 @@ type ProjectOverlayProps = {
   onClose: () => void;
 };
 
-type SectionKey = "overview" | "diagnostics" | "recommendation";
+type SectionKey = "overview" | "diagnostics" | "recommendation" | "redirects";
 
 type PreviewState = "loading" | "ready" | "broken" | "missing";
 
@@ -33,6 +33,15 @@ type ValidationResult = {
   contentType?: string | null;
   error?: string;
   link?: string;
+  redirectChain?: string[];
+  responseTime?: number;
+};
+
+type FlagVariant = "safe" | "warn" | "danger" | "neutral";
+
+type DiagnosticFlag = {
+  label: string;
+  variant: FlagVariant;
 };
 
 const VALIDATION_ENDPOINT = "/digitalhub/api/validate";
@@ -371,37 +380,59 @@ export default function ProjectOverlay({
         ? "ADD A VALID LINK"
         : "VERIFY ROUTE OR PAGE";
 
-  const diagnosticFlags =
+  const diagnosticFlags: DiagnosticFlag[] =
     previewState === "ready" && validation
       ? [
-          isHttps ? "HTTPS: ENCRYPTED CONNECTION" : "HTTP: NO ENCRYPTION",
-          `HTTP ${validation.statusCode ?? "---"}: ${validation.statusText ?? "OK"}`,
-          hasRedirect ? "REDIRECT DETECTED IN CHAIN" : "NO REDIRECT DETECTED",
-          validation.contentType
-            ? `TYPE: ${validation.contentType.split(";")[0].trim().toUpperCase()}`
-            : "CONTENT TYPE UNKNOWN",
+          {
+            label: isHttps ? "HTTPS: ENCRYPTED CONNECTION" : "HTTP: NO ENCRYPTION",
+            variant: isHttps ? "safe" : "danger",
+          },
+          {
+            label: `HTTP ${validation.statusCode ?? "---"}: ${validation.statusText ?? "OK"}`,
+            variant:
+              validation.statusCode === 200
+                ? "safe"
+                : validation.statusCode && validation.statusCode < 400
+                  ? "safe"
+                  : validation.statusCode && validation.statusCode < 500
+                    ? "warn"
+                    : "danger",
+          },
+          {
+            label: hasRedirect ? "REDIRECT DETECTED IN CHAIN" : "NO REDIRECT DETECTED",
+            variant: hasRedirect ? "warn" : "safe",
+          },
+          {
+            label: validation.contentType
+              ? `TYPE: ${validation.contentType.split(";")[0].trim().toUpperCase()}`
+              : "CONTENT TYPE UNKNOWN",
+            variant: validation.contentType ? "neutral" : "warn",
+          },
         ]
       : previewState === "loading"
         ? [
-            "PREVIEW REQUEST QUEUED",
-            "ROUTE VALIDATION PENDING",
-            "REMOTE STATUS UNKNOWN",
-            "SESSION CHECK ACTIVE",
+            { label: "PREVIEW REQUEST QUEUED", variant: "neutral" },
+            { label: "ROUTE VALIDATION PENDING", variant: "neutral" },
+            { label: "REMOTE STATUS UNKNOWN", variant: "neutral" },
+            { label: "SESSION CHECK ACTIVE", variant: "neutral" },
           ]
         : previewState === "missing"
           ? [
-              "NO TARGET LINK PROVIDED",
-              "PREVIEW CAPTURE DISABLED",
-              "MANUAL ROUTE REQUIRED",
-              "PROJECT RECORD INCOMPLETE",
+              { label: "NO TARGET LINK PROVIDED", variant: "danger" },
+              { label: "PREVIEW CAPTURE DISABLED", variant: "warn" },
+              { label: "MANUAL ROUTE REQUIRED", variant: "warn" },
+              { label: "PROJECT RECORD INCOMPLETE", variant: "danger" },
             ]
           : [
-              "PREVIEW CAPTURE FAILED",
-              validation?.statusCode
-                ? `REMOTE RESPONSE ${validation.statusCode}`
-                : "POSSIBLE 404 OR DEAD ROUTE",
-              "REMOTE TARGET NOT VERIFIED",
-              "MANUAL CHECK RECOMMENDED",
+              { label: "PREVIEW CAPTURE FAILED", variant: "danger" },
+              {
+                label: validation?.statusCode
+                  ? `REMOTE RESPONSE ${validation.statusCode}`
+                  : "POSSIBLE 404 OR DEAD ROUTE",
+                variant: "danger",
+              },
+              { label: "REMOTE TARGET NOT VERIFIED", variant: "danger" },
+              { label: "MANUAL CHECK RECOMMENDED", variant: "warn" },
             ];
 
   const errorTitle =
@@ -662,7 +693,7 @@ export default function ProjectOverlay({
             {hasLink ? (
               <button
                 className={`threat-enter-link ${
-                  previewState !== "ready" ? "is-warning" : ""
+                  previewState === "ready" ? "is-safe" : "is-warning"
                 }`}
                 onClick={handleNavigate}
                 disabled={isNavigating || isValidating}
@@ -781,6 +812,27 @@ export default function ProjectOverlay({
                             : "NONE DETECTED"}
                       </span>
                     </div>
+
+                    {validation?.responseTime !== undefined && (
+                      <div className="data-field">
+                        <span className="field-label">RESPONSE</span>
+                        <span
+                          className={`field-value ${
+                            validation.responseTime < 1000
+                              ? "status-ready"
+                              : validation.responseTime < 3000
+                                ? ""
+                                : "offline"
+                          }`}
+                        >
+                          {validation.responseTime < 1000
+                            ? `${validation.responseTime}ms ✓`
+                            : validation.responseTime < 3000
+                              ? `${validation.responseTime}ms`
+                              : `${(validation.responseTime / 1000).toFixed(1)}s SLOW`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -808,14 +860,59 @@ export default function ProjectOverlay({
                 <div className="section-body">
                   <div className="flags-list">
                     {diagnosticFlags.map((flag) => (
-                      <span className="flag" key={flag}>
-                        {flag}
+                      <span className={`flag flag-${flag.variant}`} key={flag.label}>
+                        {flag.label}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
             </div>
+
+            {validation?.redirectChain && validation.redirectChain.length > 1 && (
+              <div className="data-section">
+                <button
+                  type="button"
+                  className={`section-header clickable ${
+                    openSection === "redirects" ? "active" : ""
+                  }`}
+                  onClick={() => toggleSection("redirects")}
+                  aria-expanded={openSection === "redirects"}
+                >
+                  <span className="section-title-wrap">
+                    <span className="section-icon" style={{ color: "#fde047" }}>◆</span>
+                    <span className="section-title">REDIRECT CHAIN</span>
+                  </span>
+                  <span className="section-chevron">
+                    {openSection === "redirects" ? "−" : "+"}
+                  </span>
+                </button>
+
+                {openSection === "redirects" && (
+                  <div className="section-body">
+                    <div className="redirect-chain">
+                      {validation.redirectChain.map((hopUrl, i) => (
+                        <div key={i} className="redirect-step">
+                          <span className="redirect-step-index">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          <span
+                            className={`redirect-step-url ${
+                              i === validation.redirectChain!.length - 1 ? "is-final" : ""
+                            }`}
+                          >
+                            {hopUrl}
+                          </span>
+                          {i < validation.redirectChain!.length - 1 && (
+                            <span className="redirect-arrow">↓</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="data-section">
               <button
