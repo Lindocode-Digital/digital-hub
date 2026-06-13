@@ -63,7 +63,7 @@ export const projects: Project[] = [
     background:
       "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fscreenshot_image4.png",
     color: "",
-    link: "https://lindocode.com/projects",
+    link: "https://lindocode.com/projects?theme=minimal",
     attribute: {
       artistName: "Kelly Sikkema",
       artistLink: "",
