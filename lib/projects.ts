@@ -66,7 +66,8 @@ export const projects: Project[] = [
     cardTitle: "PORTFOLIO",
     cardSubtitle: "Fullstack",
     description: "Web|Mobile Developer",
-    image: "https://picsum.photos/seed/lindocode-portfolio/800/534",
+    image:
+      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fcreativehub_images_cards_cards7.webp",
     background: "",
     color: "",
     link: "https://portfolio.lindocode.com",
@@ -88,7 +89,8 @@ export const projects: Project[] = [
     cardSubtitle: "Visit Us",
     description: "Tech Solutions",
     extra: "Effortless tech, maximum ease.",
-    image: "https://picsum.photos/seed/lindocode-digital-tech/800/534",
+    image:
+      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fcreativehub_images_cards_cards.webp",
     background: "",
     color: "",
     link: "https://lindocode.com",
@@ -110,7 +112,8 @@ export const projects: Project[] = [
     cardTitle: "LAZYREADER",
     cardSubtitle: "Mobile",
     description: "Reading Experience",
-    image: "https://picsum.photos/seed/lazyreader-books-mobile/800/534",
+    image:
+      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fcreativehub_images_cards_cards9.webp",
     background: "",
     color: "",
     link: "https://lazyreader.lindocode.com",
@@ -132,7 +135,8 @@ export const projects: Project[] = [
     cardTitle: "SHOWCASE",
     cardSubtitle: "Projects",
     description: "Web & Mobile Apps",
-    image: "https://picsum.photos/seed/lindocode-showcase-apps/800/534",
+    image:
+      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fcreativehub_images_cards_projects.webp",
     background: "",
     color: "",
     link: "https://lindocode.com/projects",

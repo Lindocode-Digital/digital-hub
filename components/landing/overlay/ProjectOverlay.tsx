@@ -291,7 +291,7 @@ export default function ProjectOverlay({
       if (link.startsWith("/")) {
         router.push(link);
       } else {
-        window.location.assign(link);
+        window.open(link, "_blank", "noopener,noreferrer");
       }
     }, 50);
   };
@@ -481,6 +481,11 @@ export default function ProjectOverlay({
         : project?.link || "NO LINK AVAILABLE";
 
   if (animationState === "closed" || !project) return null;
+
+  let checkHostname = "";
+  try {
+    if (project.link) checkHostname = new URL(project.link).hostname;
+  } catch {}
 
   return createPortal(
     <div
@@ -1060,6 +1065,16 @@ export default function ProjectOverlay({
                       : "0 0 50px rgba(239, 68, 68, 0.14), 0 28px 64px rgba(0,0,0,0.65)",
               }}
             >
+              {/* X — dismiss without navigating */}
+              <button
+                className="safety-disclaimer-close"
+                onClick={() => setShowDisclaimer(false)}
+                type="button"
+                aria-label="Cancel"
+              >
+                ✕
+              </button>
+
               <span
                 className="safety-disclaimer-icon"
                 aria-hidden="true"
@@ -1093,40 +1108,88 @@ export default function ProjectOverlay({
               </div>
 
               <p className="safety-disclaimer-text">
-                The maximum possible score is&nbsp;<strong>85</strong>, by
-                design. Automated checks cover HTTPS, reachability, and
-                redirect patterns only — they cannot assess content, intent,
-                or legitimacy. No tool can guarantee a link is safe.
-                Always verify independently before navigating.
+                Score is capped at&nbsp;<strong>85</strong> by design.
+                Automated checks cover HTTPS, reachability, and redirect
+                patterns only — they cannot assess content, intent, or
+                legitimacy. Verify the link independently before proceeding.
               </p>
 
-              <button
-                className="safety-disclaimer-btn"
-                onClick={proceedWithNavigation}
-                type="button"
-                style={{
-                  borderColor:
-                    trustLevel === "HIGH"
-                      ? "rgba(234, 179, 8, 0.55)"
-                      : trustLevel === "MEDIUM"
-                        ? "rgba(251, 146, 60, 0.55)"
-                        : "rgba(239, 68, 68, 0.55)",
-                  color:
-                    trustLevel === "HIGH"
-                      ? "#fde047"
-                      : trustLevel === "MEDIUM"
-                        ? "#fb923c"
-                        : "#f87171",
-                  background:
-                    trustLevel === "HIGH"
-                      ? "linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(234, 179, 8, 0.06))"
-                      : trustLevel === "MEDIUM"
-                        ? "linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(251, 146, 60, 0.06))"
-                        : "linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.06))",
-                }}
-              >
-                I UNDERSTAND — OPEN LINK
-              </button>
+              {/* Third-party verification services */}
+              <div className="safety-verify-section">
+                <span className="safety-verify-label">VERIFY INDEPENDENTLY</span>
+                <div className="safety-verify-links">
+                  <a
+                    href={`https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(project.link ?? "")}&hl=en`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="safety-verify-link"
+                  >
+                    Google Safe Browsing ↗
+                  </a>
+                  <a
+                    href="https://www.virustotal.com/gui/home/url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="safety-verify-link"
+                  >
+                    VirusTotal ↗
+                  </a>
+                  <a
+                    href={`https://www.urlvoid.com/scan/${checkHostname}/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="safety-verify-link"
+                  >
+                    URLVoid ↗
+                  </a>
+                  <a
+                    href={`https://who.is/whois/${checkHostname}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="safety-verify-link"
+                  >
+                    WHOIS Lookup ↗
+                  </a>
+                </div>
+              </div>
+
+              <div className="safety-disclaimer-actions">
+                <button
+                  className="safety-disclaimer-btn"
+                  onClick={proceedWithNavigation}
+                  type="button"
+                  style={{
+                    borderColor:
+                      trustLevel === "HIGH"
+                        ? "rgba(234, 179, 8, 0.55)"
+                        : trustLevel === "MEDIUM"
+                          ? "rgba(251, 146, 60, 0.55)"
+                          : "rgba(239, 68, 68, 0.55)",
+                    color:
+                      trustLevel === "HIGH"
+                        ? "#fde047"
+                        : trustLevel === "MEDIUM"
+                          ? "#fb923c"
+                          : "#f87171",
+                    background:
+                      trustLevel === "HIGH"
+                        ? "linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(234, 179, 8, 0.06))"
+                        : trustLevel === "MEDIUM"
+                          ? "linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(251, 146, 60, 0.06))"
+                          : "linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.06))",
+                  }}
+                >
+                  OPEN IN NEW TAB ↗
+                </button>
+
+                <button
+                  className="safety-disclaimer-cancel"
+                  onClick={() => setShowDisclaimer(false)}
+                  type="button"
+                >
+                  Cancel — go back
+                </button>
+              </div>
             </div>
           </div>
         )}
