@@ -666,7 +666,7 @@ export default function ProjectOverlay({
                   <div className="section-header">
                     <span className="section-title-wrap">
                       <span className="section-icon">◆</span>
-                      <span className="section-title">IMAGE CREDIT</span>
+                      <span className="section-title">CARD IMAGE CREDIT</span>
                     </span>
                   </div>
                   <div className="section-body">
