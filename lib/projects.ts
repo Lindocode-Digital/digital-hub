@@ -65,11 +65,9 @@ export const projects: Project[] = [
     color: "",
     link: "https://lindocode.com/projects",
     attribute: {
-      artistName: "Andrew Neel",
-      artistLink:
-        "https://unsplash.com/@andrewt neel?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
-      artistWorkLink:
-        "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistName: "Kelly Sikkema",
+      artistLink: "",
+      artistWorkLink: "",
       artistPlatform: "Unsplash",
     },
   },
@@ -92,11 +90,9 @@ export const projects: Project[] = [
     color: "",
     link: "https://portfolio.lindocode.com",
     attribute: {
-      artistName: "Kelly Sikkema",
-      artistLink:
-        "https://unsplash.com/@kellysikkema?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
-      artistWorkLink:
-        "https://unsplash.com/photos/yellow-click-pen-on-white-printer-paper-gcHFXsdcmJE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistName: "Ales Nesetril",
+      artistLink: "",
+      artistWorkLink: "",
       artistPlatform: "Unsplash",
     },
   },
