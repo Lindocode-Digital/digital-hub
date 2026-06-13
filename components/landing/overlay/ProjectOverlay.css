@@ -1032,3 +1032,118 @@
   line-height: 1;
   padding-top: 2px;
 }
+
+/* ─── Safety disclaimer blocking popup ───────────────── */
+
+.safety-disclaimer-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(4, 6, 12, 0.88);
+  backdrop-filter: blur(6px);
+  border-radius: 24px;
+  animation: disclaimerIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes disclaimerIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.safety-disclaimer-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 40px 36px 36px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  border-radius: 22px;
+  background: linear-gradient(
+    180deg,
+    rgba(14, 17, 28, 0.98) 0%,
+    rgba(8, 10, 18, 0.99) 100%
+  );
+  border: 1px solid;
+}
+
+.safety-disclaimer-icon {
+  font-size: 36px;
+  line-height: 1;
+  filter: drop-shadow(0 0 12px currentColor);
+}
+
+.safety-disclaimer-score {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 2.2px;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+}
+
+.safety-disclaimer-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.75;
+  color: rgba(245, 247, 251, 0.84);
+  max-width: 380px;
+}
+
+.safety-disclaimer-text strong {
+  color: rgba(245, 247, 251, 0.96);
+  font-weight: 700;
+}
+
+.safety-disclaimer-btn {
+  appearance: none;
+  margin-top: 6px;
+  padding: 13px 32px;
+  border-radius: 14px;
+  border: 1px solid;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.safety-disclaimer-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.safety-disclaimer-btn:active {
+  transform: scale(0.975);
+}
+
+@media (max-width: 600px) {
+  .safety-disclaimer-panel {
+    padding: 28px 20px 24px;
+    gap: 14px;
+  }
+
+  .safety-disclaimer-text {
+    font-size: 13px;
+  }
+
+  .safety-disclaimer-btn {
+    padding: 12px 20px;
+    font-size: 10px;
+  }
+}

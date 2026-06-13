@@ -83,7 +83,7 @@ export default function LinkChecker() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleScan()}
-            placeholder="Paste any link to inspect — https://example.com"
+            placeholder="Paste any link to inspect - https://example.com"
             className="
               flex-1 min-w-0 bg-transparent
               text-sm text-neutral-800 placeholder:text-neutral-400

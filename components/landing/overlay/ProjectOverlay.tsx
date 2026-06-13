@@ -56,6 +56,7 @@ export default function ProjectOverlay({
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [openSection, setOpenSection] = useState<SectionKey>("overview");
   const [isValidating, setIsValidating] = useState(false);
   const [validation, setValidation] = useState<ValidationResult | null>(null);
@@ -121,6 +122,7 @@ export default function ProjectOverlay({
       setIsImageLoading(false);
       setImageError(false);
       setIsNavigating(false);
+      setShowDisclaimer(false);
       setOpenSection("overview");
       setValidation(null);
       setIsValidating(Boolean(project.link));
@@ -275,17 +277,16 @@ export default function ProjectOverlay({
     };
   }, [isOpen, project?.link]);
 
-  const handleNavigate = () => {
-    if (!project?.link || isNavigating || isValidating) return;
+  // Links scanned via the LinkChecker bar get the safety disclaimer on open.
+  // Curated projects in lib/projects.ts (cardId !== "link-check") skip it.
+  const isUserLink = project?.cardId === "link-check";
 
+  const proceedWithNavigation = () => {
+    if (!project?.link || isNavigating) return;
     const link = project.link;
-
-    startTransition(() => {
-      setIsNavigating(true);
-    });
-
+    setShowDisclaimer(false);
+    startTransition(() => setIsNavigating(true));
     clearNavigationTimeout();
-
     navigationTimeoutRef.current = setTimeout(() => {
       if (link.startsWith("/")) {
         router.push(link);
@@ -293,6 +294,15 @@ export default function ProjectOverlay({
         window.location.assign(link);
       }
     }, 50);
+  };
+
+  const handleNavigate = () => {
+    if (!project?.link || isNavigating || isValidating) return;
+    if (isUserLink) {
+      setShowDisclaimer(true);
+      return;
+    }
+    proceedWithNavigation();
   };
 
   const toggleSection = (section: SectionKey) => {
@@ -331,22 +341,37 @@ export default function ProjectOverlay({
       validation.finalUrl !== project.link,
   );
 
+  // Only cross-domain redirects (e.g. google.com → evil.com) are suspicious.
+  // Same-domain redirects (www ↔ non-www, trailing slash) are routine and safe.
+  const hasCrossDomainRedirect = useMemo(() => {
+    if (!validation?.redirectChain || validation.redirectChain.length < 2) return false;
+    try {
+      const firstHost = new URL(validation.redirectChain[0]).hostname.replace(/^www\./, "");
+      const lastHost = new URL(validation.redirectChain[validation.redirectChain.length - 1]).hostname.replace(/^www\./, "");
+      return firstHost !== lastHost;
+    } catch {
+      return false;
+    }
+  }, [validation?.redirectChain]);
+
+  // Max achievable score is 85. Automated checks cannot guarantee content safety,
+  // so 100 is intentionally unreachable.
   const trustScore: number | null = useMemo(() => {
     if (!hasLink || isValidating || !validation) return null;
     let score = 0;
-    if (isHttps) score += 35;
-    if (validation.isWorking) score += 30;
-    if (!hasRedirect) score += 20;
+    if (isHttps) score += 30;
+    if (validation.isWorking) score += 25;
+    if (!hasCrossDomainRedirect) score += 15;
     if (validation.statusCode === 200) score += 15;
-    return Math.min(score, 100);
-  }, [hasLink, isValidating, validation, isHttps, hasRedirect]);
+    return score; // max 85
+  }, [hasLink, isValidating, validation, isHttps, hasCrossDomainRedirect]);
 
   const trustLevel =
     trustScore === null
       ? "SCANNING"
-      : trustScore >= 80
+      : trustScore >= 70
         ? "HIGH"
-        : trustScore >= 50
+        : trustScore >= 45
           ? "MEDIUM"
           : "LOW";
 
@@ -399,8 +424,12 @@ export default function ProjectOverlay({
                     : "danger",
           },
           {
-            label: hasRedirect ? "REDIRECT DETECTED IN CHAIN" : "NO REDIRECT DETECTED",
-            variant: hasRedirect ? "warn" : "safe",
+            label: !hasRedirect
+              ? "NO REDIRECT DETECTED"
+              : hasCrossDomainRedirect
+                ? "CROSS-DOMAIN REDIRECT DETECTED"
+                : "SAME-DOMAIN REDIRECT (NORMAL)",
+            variant: !hasRedirect ? "safe" : hasCrossDomainRedirect ? "danger" : "warn",
           },
           {
             label: validation.contentType
@@ -501,7 +530,7 @@ export default function ProjectOverlay({
                         }
                 }
               >
-                TRUST: {trustScore}%
+                TRUST: {trustScore}/85
               </span>
             )}
             <div className="threat-title-stack">
@@ -678,13 +707,13 @@ export default function ProjectOverlay({
                 <span className="stat-label">TRUST SCORE</span>
                 <span
                   className={`stat-value ${
-                    trustScore !== null && trustScore >= 80 ? "online" : "offline"
+                    trustScore !== null && trustScore >= 70 ? "online" : "offline"
                   }`}
                 >
                   {isValidating
                     ? "SCANNING"
                     : trustScore !== null
-                      ? `${trustScore}%`
+                      ? `${trustScore}/85`
                       : "N/A"}
                 </span>
               </div>
@@ -731,7 +760,7 @@ export default function ProjectOverlay({
               <span className="hero-summary-kicker">LINK ANALYSIS</span>
               <p className="hero-summary-text">
                 {previewState === "ready"
-                  ? "Live preview confirmed. Trust indicators verified. Review the safety flags and link metadata before navigating to the target."
+                  ? `Trust score ${trustScore ?? 0}/85 — review the safety flags and redirect data below before opening this link.`
                   : previewState === "loading"
                     ? "Real-time analysis in progress. Scanning the link for safety signals, HTTPS status, and redirect chains."
                     : previewState === "missing"
@@ -807,9 +836,11 @@ export default function ProjectOverlay({
                       <span className="field-value mono">
                         {isValidating
                           ? "CHECKING..."
-                          : hasRedirect
-                            ? `YES → ${(validation?.finalUrl ?? "").slice(0, 30)}…`
-                            : "NONE DETECTED"}
+                          : !hasRedirect
+                            ? "NONE DETECTED"
+                            : hasCrossDomainRedirect
+                              ? `CROSS-DOMAIN → ${(validation?.finalUrl ?? "").slice(0, 24)}…`
+                              : `SAME-DOMAIN → ${(validation?.finalUrl ?? "").slice(0, 25)}…`}
                       </span>
                     </div>
 
@@ -1008,6 +1039,97 @@ export default function ProjectOverlay({
             <span>ID: 8472-AA</span>
           </div>
         </div>
+
+        {/* Safety disclaimer — shown on open-click for user-submitted links */}
+        {showDisclaimer && (
+          <div className="safety-disclaimer-overlay">
+            <div
+              className="safety-disclaimer-panel"
+              style={{
+                borderColor:
+                  trustLevel === "HIGH"
+                    ? "rgba(234, 179, 8, 0.45)"
+                    : trustLevel === "MEDIUM"
+                      ? "rgba(251, 146, 60, 0.45)"
+                      : "rgba(239, 68, 68, 0.45)",
+                boxShadow:
+                  trustLevel === "HIGH"
+                    ? "0 0 50px rgba(234, 179, 8, 0.14), 0 28px 64px rgba(0,0,0,0.65)"
+                    : trustLevel === "MEDIUM"
+                      ? "0 0 50px rgba(251, 146, 60, 0.14), 0 28px 64px rgba(0,0,0,0.65)"
+                      : "0 0 50px rgba(239, 68, 68, 0.14), 0 28px 64px rgba(0,0,0,0.65)",
+              }}
+            >
+              <span
+                className="safety-disclaimer-icon"
+                aria-hidden="true"
+                style={{
+                  color:
+                    trustLevel === "HIGH"
+                      ? "#fde047"
+                      : trustLevel === "MEDIUM"
+                        ? "#fb923c"
+                        : "#f87171",
+                }}
+              >
+                ⚠
+              </span>
+
+              <div className="safety-disclaimer-score">
+                TRUST SCORE&nbsp;&nbsp;
+                <span
+                  style={{
+                    color:
+                      trustLevel === "HIGH"
+                        ? "#a5ffb4"
+                        : trustLevel === "MEDIUM"
+                          ? "#fde047"
+                          : "#ffd6d5",
+                  }}
+                >
+                  {trustScore}/85
+                </span>
+                &nbsp;&nbsp;·&nbsp;&nbsp;{trustLevel}
+              </div>
+
+              <p className="safety-disclaimer-text">
+                The maximum possible score is&nbsp;<strong>85</strong>, by
+                design. Automated checks cover HTTPS, reachability, and
+                redirect patterns only — they cannot assess content, intent,
+                or legitimacy. No tool can guarantee a link is safe.
+                Always verify independently before navigating.
+              </p>
+
+              <button
+                className="safety-disclaimer-btn"
+                onClick={proceedWithNavigation}
+                type="button"
+                style={{
+                  borderColor:
+                    trustLevel === "HIGH"
+                      ? "rgba(234, 179, 8, 0.55)"
+                      : trustLevel === "MEDIUM"
+                        ? "rgba(251, 146, 60, 0.55)"
+                        : "rgba(239, 68, 68, 0.55)",
+                  color:
+                    trustLevel === "HIGH"
+                      ? "#fde047"
+                      : trustLevel === "MEDIUM"
+                        ? "#fb923c"
+                        : "#f87171",
+                  background:
+                    trustLevel === "HIGH"
+                      ? "linear-gradient(135deg, rgba(234, 179, 8, 0.18), rgba(234, 179, 8, 0.06))"
+                      : trustLevel === "MEDIUM"
+                        ? "linear-gradient(135deg, rgba(251, 146, 60, 0.18), rgba(251, 146, 60, 0.06))"
+                        : "linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.06))",
+                }}
+              >
+                I UNDERSTAND — OPEN LINK
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>,
     document.body,
