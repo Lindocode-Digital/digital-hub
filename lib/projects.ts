@@ -138,7 +138,8 @@ export const projects: Project[] = [
     description: "Art of Storytelling",
     image:
       "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fnew_mockup.webp",
-    background: "",
+    background:
+      "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fscreenshot_image1.png",
     color: "",
     link: "https://sdrowvieli.lindocode.com",
     attribute: {
