@@ -20,7 +20,12 @@ type ProjectOverlayProps = {
   onClose: () => void;
 };
 
-type SectionKey = "overview" | "diagnostics" | "headers" | "recommendation" | "redirects";
+type SectionKey =
+  | "overview"
+  | "diagnostics"
+  | "headers"
+  | "recommendation"
+  | "redirects";
 
 type PreviewState = "loading" | "ready" | "broken" | "missing";
 
@@ -64,6 +69,9 @@ type FlagVariant = "safe" | "warn" | "danger" | "neutral";
 type DiagnosticFlag = {
   label: string;
   variant: FlagVariant;
+  detail: string;
+  points: number;
+  isSkip: boolean;
 };
 
 const SCAN_ENDPOINT = "/digitalhub/api/scan";
@@ -142,7 +150,11 @@ export default function ProjectOverlay({
   useEffect(() => {
     if (isOpen && project) {
       const isShowcase = project.cardId !== "link-check";
-      setIsImageLoading(Boolean(isShowcase ? (project.background || project.image) : project.background));
+      setIsImageLoading(
+        Boolean(
+          isShowcase ? project.background || project.image : project.background,
+        ),
+      );
       setImageError(false);
       setIsNavigating(false);
       setShowDisclaimer(false);
@@ -271,7 +283,10 @@ export default function ProjectOverlay({
         if (cancelled) return;
 
         if (!response.ok || data.error) {
-          setValidation({ error: data.error ?? "Scan failed", reachable: false });
+          setValidation({
+            error: data.error ?? "Scan failed",
+            reachable: false,
+          });
         } else {
           setValidation(data);
           if (data.reachable && !project?.background) {
@@ -378,6 +393,28 @@ export default function ProjectOverlay({
           ? "MEDIUM"
           : "LOW";
 
+  const passCount =
+    validation?.signals?.filter((s) => s.status === "pass").length ?? 0;
+  const failWarnCount =
+    validation?.signals?.filter(
+      (s) => s.status === "fail" || s.status === "warn",
+    ).length ?? 0;
+  const skipCount =
+    validation?.signals?.filter((s) => s.status === "skip").length ?? 0;
+  const keyIssues =
+    validation?.signals
+      ?.filter((s) => s.status === "fail" || s.status === "warn")
+      .slice(0, 3) ?? [];
+
+  const verdictAdvice =
+    trustLevel === "HIGH"
+      ? "All or most safety checks passed — this link appears trustworthy based on automated analysis."
+      : trustLevel === "MEDIUM"
+        ? "Some checks flagged issues. Review the safety signals before opening, especially any HTTPS or redirect warnings."
+        : trustLevel === "LOW"
+          ? "Multiple checks failed. This link may be unsafe or unreachable — verify it through an independent source before proceeding."
+          : null;
+
   const projectCode =
     project?.slug && project?.domain
       ? `PROJECT LINK: ${project.domain.toUpperCase()}${project.slug.toUpperCase()}`
@@ -403,7 +440,7 @@ export default function ProjectOverlay({
 
   const recommendation =
     previewState === "ready"
-      ? "OPEN PROJECT"
+      ? "OPEN PAGE"
       : previewState === "missing"
         ? "ADD A VALID LINK"
         : "VERIFY ROUTE OR PAGE";
@@ -420,35 +457,107 @@ export default function ProjectOverlay({
           : s.status === "warn"
             ? "warn"
             : "neutral",
+    detail: s.detail,
+    points: s.points,
+    isSkip: s.status === "skip",
   });
 
   const diagnosticFlags: DiagnosticFlag[] =
     previewState === "ready" && validation?.signals?.length
-      ? validation.signals.filter((s) => s.status !== "skip").map(signalToFlag)
+      ? validation.signals.map(signalToFlag)
       : previewState === "loading"
         ? [
-            { label: "PREVIEW REQUEST QUEUED", variant: "neutral" },
-            { label: "ROUTE VALIDATION PENDING", variant: "neutral" },
-            { label: "REMOTE STATUS UNKNOWN", variant: "neutral" },
-            { label: "SESSION CHECK ACTIVE", variant: "neutral" },
+            {
+              label: "PREVIEW REQUEST QUEUED",
+              variant: "neutral" as FlagVariant,
+              detail: "Waiting for scan response…",
+              points: 0,
+              isSkip: false,
+            },
+            {
+              label: "ROUTE VALIDATION PENDING",
+              variant: "neutral" as FlagVariant,
+              detail: "Checking reachability and TLS",
+              points: 0,
+              isSkip: false,
+            },
+            {
+              label: "REMOTE STATUS UNKNOWN",
+              variant: "neutral" as FlagVariant,
+              detail: "Network probe in progress",
+              points: 0,
+              isSkip: false,
+            },
+            {
+              label: "SESSION CHECK ACTIVE",
+              variant: "neutral" as FlagVariant,
+              detail: "Analysing security headers",
+              points: 0,
+              isSkip: false,
+            },
           ]
         : previewState === "missing"
           ? [
-              { label: "NO TARGET LINK PROVIDED", variant: "danger" },
-              { label: "PREVIEW CAPTURE DISABLED", variant: "warn" },
-              { label: "MANUAL ROUTE REQUIRED", variant: "warn" },
-              { label: "PROJECT RECORD INCOMPLETE", variant: "danger" },
+              {
+                label: "NO TARGET LINK PROVIDED",
+                variant: "danger" as FlagVariant,
+                detail: "This project has no link configured",
+                points: 0,
+                isSkip: false,
+              },
+              {
+                label: "PREVIEW CAPTURE DISABLED",
+                variant: "warn" as FlagVariant,
+                detail: "Screenshot requires a valid URL",
+                points: 0,
+                isSkip: false,
+              },
+              {
+                label: "MANUAL ROUTE REQUIRED",
+                variant: "warn" as FlagVariant,
+                detail: "Add a link to enable safety analysis",
+                points: 0,
+                isSkip: false,
+              },
+              {
+                label: "PROJECT RECORD INCOMPLETE",
+                variant: "danger" as FlagVariant,
+                detail: "Safety checks cannot run without a target URL",
+                points: 0,
+                isSkip: false,
+              },
             ]
           : [
-              { label: "PREVIEW CAPTURE FAILED", variant: "danger" },
+              {
+                label: "PREVIEW CAPTURE FAILED",
+                variant: "danger" as FlagVariant,
+                detail: "Could not load or reach the target URL",
+                points: 0,
+                isSkip: false,
+              },
               {
                 label: validation?.status_code
                   ? `REMOTE RESPONSE ${validation.status_code}`
                   : "POSSIBLE 404 OR DEAD ROUTE",
-                variant: "danger",
+                variant: "danger" as FlagVariant,
+                detail: "Server returned an error or did not respond",
+                points: 0,
+                isSkip: false,
               },
-              { label: "REMOTE TARGET NOT VERIFIED", variant: "danger" },
-              { label: "MANUAL CHECK RECOMMENDED", variant: "warn" },
+              {
+                label: "REMOTE TARGET NOT VERIFIED",
+                variant: "danger" as FlagVariant,
+                detail: "TLS and header checks could not complete",
+                points: 0,
+                isSkip: false,
+              },
+              {
+                label: "MANUAL CHECK RECOMMENDED",
+                variant: "warn" as FlagVariant,
+                detail: "Verify the link independently before sharing",
+                points: 0,
+                isSkip: false,
+              },
             ];
 
   const errorTitle =
@@ -476,7 +585,9 @@ export default function ProjectOverlay({
     return createPortal(
       <div
         className={`threat-overlay-wrapper ${animationState === "open" ? "is-open" : ""} ${animationState === "closing" ? "is-closing" : ""} ${isNavigating ? "is-navigating" : ""}`}
-        onClick={animationState === "open" && !isNavigating ? onClose : undefined}
+        onClick={
+          animationState === "open" && !isNavigating ? onClose : undefined
+        }
       >
         <div className="threat-overlay-backdrop" />
         <div
@@ -524,7 +635,12 @@ export default function ProjectOverlay({
                     {imageError && (
                       <div className="screenshot-loading is-error">
                         <div className="preview-status-badge">PREVIEW</div>
-                        <div className="error-icon" style={{ fontSize: "22px" }}>⊘</div>
+                        <div
+                          className="error-icon"
+                          style={{ fontSize: "22px" }}
+                        >
+                          ⊘
+                        </div>
                         <span>IMAGE UNAVAILABLE</span>
                       </div>
                     )}
@@ -532,15 +648,26 @@ export default function ProjectOverlay({
                       src={showcaseImageSrc}
                       alt={project.title}
                       className="threat-image"
-                      style={{ display: !isImageLoading && !imageError ? "block" : "none" }}
-                      onLoad={() => { setIsImageLoading(false); setImageError(false); }}
-                      onError={() => { setImageError(true); setIsImageLoading(false); }}
+                      style={{
+                        display:
+                          !isImageLoading && !imageError ? "block" : "none",
+                      }}
+                      onLoad={() => {
+                        setIsImageLoading(false);
+                        setImageError(false);
+                      }}
+                      onError={() => {
+                        setImageError(true);
+                        setIsImageLoading(false);
+                      }}
                     />
                   </>
                 ) : (
                   <div className="screenshot-loading is-error">
                     <div className="preview-status-badge">SHOWCASE</div>
-                    <div className="error-icon" style={{ fontSize: "22px" }}>⊘</div>
+                    <div className="error-icon" style={{ fontSize: "22px" }}>
+                      ⊘
+                    </div>
                     <span>NO PREVIEW AVAILABLE</span>
                   </div>
                 )}
@@ -562,11 +689,15 @@ export default function ProjectOverlay({
               <div className="quick-stats">
                 <div className="stat-card">
                   <span className="stat-label">DOMAIN</span>
-                  <span className="stat-value online">{project.domain ?? "—"}</span>
+                  <span className="stat-value online">
+                    {project.domain ?? "—"}
+                  </span>
                 </div>
                 <div className="stat-card">
                   <span className="stat-label">CATEGORY</span>
-                  <span className="stat-value">{project.cardSubtitle ?? "PROJECT"}</span>
+                  <span className="stat-value">
+                    {project.cardSubtitle ?? "PROJECT"}
+                  </span>
                 </div>
                 <div className="stat-card">
                   <span className="stat-label">STATUS</span>
@@ -600,7 +731,9 @@ export default function ProjectOverlay({
             <div className="threat-data-panel">
               <div className="hero-summary">
                 <span className="hero-summary-kicker">ABOUT THIS PROJECT</span>
-                <p className="hero-summary-text">{overlayDescription(project)}</p>
+                <p className="hero-summary-text">
+                  {overlayDescription(project)}
+                </p>
                 {project.extra && (
                   <p
                     className="hero-summary-text"
@@ -626,15 +759,21 @@ export default function ProjectOverlay({
                     </div>
                     <div className="data-field">
                       <span className="field-label">TYPE</span>
-                      <span className="field-value">{project.cardSubtitle ?? "—"}</span>
+                      <span className="field-value">
+                        {project.cardSubtitle ?? "—"}
+                      </span>
                     </div>
                     <div className="data-field">
                       <span className="field-label">DOMAIN</span>
-                      <span className="field-value mono">{project.domain ?? "—"}</span>
+                      <span className="field-value mono">
+                        {project.domain ?? "—"}
+                      </span>
                     </div>
                     <div className="data-field">
                       <span className="field-label">LINK</span>
-                      <span className="field-value mono">{project.link ?? "—"}</span>
+                      <span className="field-value mono">
+                        {project.link ?? "—"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -830,9 +969,7 @@ export default function ProjectOverlay({
                   className="threat-image"
                   style={{
                     display:
-                      previewState === "ready" &&
-                      !isImageLoading &&
-                      !imageError
+                      previewState === "ready" && !isImageLoading && !imageError
                         ? "block"
                         : "none",
                   }}
@@ -921,7 +1058,9 @@ export default function ProjectOverlay({
                 <span className="stat-label">TRUST SCORE</span>
                 <span
                   className={`stat-value ${
-                    trustScore !== null && trustScore >= 70 ? "online" : "offline"
+                    trustScore !== null && trustScore >= 70
+                      ? "online"
+                      : "offline"
                   }`}
                 >
                   {isValidating
@@ -953,7 +1092,7 @@ export default function ProjectOverlay({
                     <span className="stream-dots">●●●</span>
                   </>
                 ) : previewState === "ready" ? (
-                  "OPEN PROJECT"
+                  "OPEN PAGE"
                 ) : (
                   "OPEN ANYWAY"
                 )}
@@ -1124,62 +1263,101 @@ export default function ProjectOverlay({
 
               {openSection === "diagnostics" && (
                 <div className="section-body">
-                  <div className="flags-list">
-                    {diagnosticFlags.map((flag) => (
-                      <span className={`flag flag-${flag.variant}`} key={flag.label}>
-                        {flag.label}
-                      </span>
+                  <div className="signals-detail-list">
+                    {diagnosticFlags.map((flag, i) => (
+                      <div
+                        key={i}
+                        className={`signal-detail-row ${flag.isSkip ? "signal-detail-row--skip" : `signal-detail-row--${flag.variant}`}`}
+                      >
+                        <span className="signal-detail-icon">
+                          {flag.isSkip
+                            ? "—"
+                            : flag.variant === "safe"
+                              ? "✓"
+                              : flag.variant === "danger"
+                                ? "✗"
+                                : flag.variant === "warn"
+                                  ? "!"
+                                  : "·"}
+                        </span>
+                        <div className="signal-detail-content">
+                          <span className="signal-detail-label">
+                            {flag.label}
+                          </span>
+                          <span className="signal-detail-text">
+                            {flag.detail}
+                          </span>
+                        </div>
+                        {flag.points > 0 && (
+                          <span className="signal-detail-points">
+                            +{flag.points}
+                          </span>
+                        )}
+                      </div>
                     ))}
                   </div>
+                  {previewState === "ready" && validation?.id === null && (
+                    <p className="signals-local-note">
+                      Score not saved — deploy backend to enable scan history.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
 
             {/* ── REDIRECT CHAIN ────────────────────────────────────────── */}
-            {validation?.redirect_chain && validation.redirect_chain.length > 1 && (
-              <div className="data-section">
-                <button
-                  type="button"
-                  className={`section-header clickable ${
-                    openSection === "redirects" ? "active" : ""
-                  }`}
-                  onClick={() => toggleSection("redirects")}
-                  aria-expanded={openSection === "redirects"}
-                >
-                  <span className="section-title-wrap">
-                    <span className="section-icon" style={{ color: "#fde047" }}>◆</span>
-                    <span className="section-title">REDIRECT CHAIN</span>
-                  </span>
-                  <span className="section-chevron">
-                    {openSection === "redirects" ? "−" : "+"}
-                  </span>
-                </button>
+            {validation?.redirect_chain &&
+              validation.redirect_chain.length > 1 && (
+                <div className="data-section">
+                  <button
+                    type="button"
+                    className={`section-header clickable ${
+                      openSection === "redirects" ? "active" : ""
+                    }`}
+                    onClick={() => toggleSection("redirects")}
+                    aria-expanded={openSection === "redirects"}
+                  >
+                    <span className="section-title-wrap">
+                      <span
+                        className="section-icon"
+                        style={{ color: "#fde047" }}
+                      >
+                        ◆
+                      </span>
+                      <span className="section-title">REDIRECT CHAIN</span>
+                    </span>
+                    <span className="section-chevron">
+                      {openSection === "redirects" ? "−" : "+"}
+                    </span>
+                  </button>
 
-                {openSection === "redirects" && (
-                  <div className="section-body">
-                    <div className="redirect-chain">
-                      {validation.redirect_chain.map((hopUrl, i) => (
-                        <div key={i} className="redirect-step">
-                          <span className="redirect-step-index">
-                            {String(i + 1).padStart(2, "0")}
-                          </span>
-                          <span
-                            className={`redirect-step-url ${
-                              i === validation.redirect_chain!.length - 1 ? "is-final" : ""
-                            }`}
-                          >
-                            {hopUrl}
-                          </span>
-                          {i < validation.redirect_chain!.length - 1 && (
-                            <span className="redirect-arrow">↓</span>
-                          )}
-                        </div>
-                      ))}
+                  {openSection === "redirects" && (
+                    <div className="section-body">
+                      <div className="redirect-chain">
+                        {validation.redirect_chain.map((hopUrl, i) => (
+                          <div key={i} className="redirect-step">
+                            <span className="redirect-step-index">
+                              {String(i + 1).padStart(2, "0")}
+                            </span>
+                            <span
+                              className={`redirect-step-url ${
+                                i === validation.redirect_chain!.length - 1
+                                  ? "is-final"
+                                  : ""
+                              }`}
+                            >
+                              {hopUrl}
+                            </span>
+                            {i < validation.redirect_chain!.length - 1 && (
+                              <span className="redirect-arrow">↓</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
 
             {/* ── SECURITY HEADERS ──────────────────────────────────────── */}
             {previewState === "ready" && validation?.headers && (
@@ -1208,9 +1386,18 @@ export default function ProjectOverlay({
                         [
                           { label: "HSTS", value: validation.headers.hsts },
                           { label: "CSP", value: validation.headers.csp },
-                          { label: "X-FRAME-OPTIONS", value: validation.headers.x_frame_options },
-                          { label: "REFERRER-POLICY", value: validation.headers.referrer_policy },
-                          { label: "PERMISSIONS-POLICY", value: validation.headers.permissions_policy },
+                          {
+                            label: "X-FRAME-OPTIONS",
+                            value: validation.headers.x_frame_options,
+                          },
+                          {
+                            label: "REFERRER-POLICY",
+                            value: validation.headers.referrer_policy,
+                          },
+                          {
+                            label: "PERMISSIONS-POLICY",
+                            value: validation.headers.permissions_policy,
+                          },
                         ] as { label: string; value: boolean | null }[]
                       ).map(({ label, value }) => (
                         <div className="data-field" key={label}>
@@ -1224,7 +1411,11 @@ export default function ProjectOverlay({
                                   : ""
                             }`}
                           >
-                            {value === null ? "N/A" : value ? "PRESENT ✓" : "MISSING"}
+                            {value === null
+                              ? "N/A"
+                              : value
+                                ? "PRESENT ✓"
+                                : "MISSING"}
                           </span>
                         </div>
                       ))}
@@ -1246,7 +1437,7 @@ export default function ProjectOverlay({
               >
                 <span className="section-title-wrap">
                   <span className="section-icon">◆</span>
-                  <span className="section-title">VERDICT & ACTION</span>
+                  <span className="section-title">VERDICT</span>
                 </span>
                 <span className="section-chevron">
                   {openSection === "recommendation" ? "−" : "+"}
@@ -1283,7 +1474,96 @@ export default function ProjectOverlay({
                         {recommendation}
                       </span>
                     </div>
+
+                    {previewState === "ready" && trustScore !== null && (
+                      <div className="conclusion-row">
+                        <span className="conclusion-label">TRUST LEVEL</span>
+                        <span
+                          className={`conclusion-value verdict-trust-level--${trustLevel.toLowerCase()}`}
+                        >
+                          {trustLevel}
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {previewState === "ready" && trustScore !== null && (
+                    <>
+                      {/* Score bar */}
+                      <div className="verdict-score-section">
+                        <div className="verdict-score-header">
+                          <span className="verdict-score-label">
+                            TRUST SCORE
+                          </span>
+                          <span className="verdict-score-value">
+                            {trustScore}/100
+                          </span>
+                        </div>
+                        <div className="verdict-score-track">
+                          <div
+                            className={`verdict-score-fill verdict-score-fill--${trustLevel.toLowerCase()}`}
+                            style={{ width: `${trustScore}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Checks summary */}
+                      <div className="verdict-checks-row">
+                        <div className="verdict-check-cell">
+                          <span className="verdict-check-num verdict-check-num--pass">
+                            {passCount}
+                          </span>
+                          <span className="verdict-check-desc">PASSED</span>
+                        </div>
+                        <div className="verdict-check-cell">
+                          <span className="verdict-check-num verdict-check-num--fail">
+                            {failWarnCount}
+                          </span>
+                          <span className="verdict-check-desc">FLAGGED</span>
+                        </div>
+                        {skipCount > 0 && (
+                          <div className="verdict-check-cell">
+                            <span className="verdict-check-num verdict-check-num--skip">
+                              {skipCount}
+                            </span>
+                            <span className="verdict-check-desc">SKIPPED</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Key issues */}
+                      {keyIssues.length > 0 && (
+                        <div className="verdict-issues">
+                          <span className="verdict-issues-title">
+                            KEY ISSUES
+                          </span>
+                          {keyIssues.map((issue) => (
+                            <div
+                              key={issue.id}
+                              className={`verdict-issue ${issue.status === "fail" ? "verdict-issue--danger" : "verdict-issue--warn"}`}
+                            >
+                              <span className="verdict-issue-icon">
+                                {issue.status === "fail" ? "✗" : "!"}
+                              </span>
+                              <div className="verdict-issue-body">
+                                <span className="verdict-issue-label">
+                                  {issue.label}
+                                </span>
+                                <span className="verdict-issue-detail">
+                                  {issue.detail}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Level advice */}
+                      {verdictAdvice && (
+                        <p className="verdict-advice">{verdictAdvice}</p>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -1399,7 +1679,9 @@ export default function ProjectOverlay({
               </p>
 
               <div className="safety-verify-section">
-                <span className="safety-verify-label">VERIFY INDEPENDENTLY</span>
+                <span className="safety-verify-label">
+                  VERIFY INDEPENDENTLY
+                </span>
                 <div className="safety-verify-links">
                   <a
                     href={`https://transparencyreport.google.com/safe-browsing/search?url=${encodeURIComponent(project.link ?? "")}&hl=en`}
