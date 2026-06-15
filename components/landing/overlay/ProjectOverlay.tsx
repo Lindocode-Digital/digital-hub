@@ -64,6 +64,9 @@ type FlagVariant = "safe" | "warn" | "danger" | "neutral";
 type DiagnosticFlag = {
   label: string;
   variant: FlagVariant;
+  detail: string;
+  points: number;
+  isSkip: boolean;
 };
 
 const SCAN_ENDPOINT = "/digitalhub/api/scan";
@@ -420,35 +423,41 @@ export default function ProjectOverlay({
           : s.status === "warn"
             ? "warn"
             : "neutral",
+    detail: s.detail,
+    points: s.points,
+    isSkip: s.status === "skip",
   });
 
   const diagnosticFlags: DiagnosticFlag[] =
     previewState === "ready" && validation?.signals?.length
-      ? validation.signals.filter((s) => s.status !== "skip").map(signalToFlag)
+      ? validation.signals.map(signalToFlag)
       : previewState === "loading"
         ? [
-            { label: "PREVIEW REQUEST QUEUED", variant: "neutral" },
-            { label: "ROUTE VALIDATION PENDING", variant: "neutral" },
-            { label: "REMOTE STATUS UNKNOWN", variant: "neutral" },
-            { label: "SESSION CHECK ACTIVE", variant: "neutral" },
+            { label: "PREVIEW REQUEST QUEUED", variant: "neutral" as FlagVariant, detail: "Waiting for scan response…", points: 0, isSkip: false },
+            { label: "ROUTE VALIDATION PENDING", variant: "neutral" as FlagVariant, detail: "Checking reachability and TLS", points: 0, isSkip: false },
+            { label: "REMOTE STATUS UNKNOWN", variant: "neutral" as FlagVariant, detail: "Network probe in progress", points: 0, isSkip: false },
+            { label: "SESSION CHECK ACTIVE", variant: "neutral" as FlagVariant, detail: "Analysing security headers", points: 0, isSkip: false },
           ]
         : previewState === "missing"
           ? [
-              { label: "NO TARGET LINK PROVIDED", variant: "danger" },
-              { label: "PREVIEW CAPTURE DISABLED", variant: "warn" },
-              { label: "MANUAL ROUTE REQUIRED", variant: "warn" },
-              { label: "PROJECT RECORD INCOMPLETE", variant: "danger" },
+              { label: "NO TARGET LINK PROVIDED", variant: "danger" as FlagVariant, detail: "This project has no link configured", points: 0, isSkip: false },
+              { label: "PREVIEW CAPTURE DISABLED", variant: "warn" as FlagVariant, detail: "Screenshot requires a valid URL", points: 0, isSkip: false },
+              { label: "MANUAL ROUTE REQUIRED", variant: "warn" as FlagVariant, detail: "Add a link to enable safety analysis", points: 0, isSkip: false },
+              { label: "PROJECT RECORD INCOMPLETE", variant: "danger" as FlagVariant, detail: "Safety checks cannot run without a target URL", points: 0, isSkip: false },
             ]
           : [
-              { label: "PREVIEW CAPTURE FAILED", variant: "danger" },
+              { label: "PREVIEW CAPTURE FAILED", variant: "danger" as FlagVariant, detail: "Could not load or reach the target URL", points: 0, isSkip: false },
               {
                 label: validation?.status_code
                   ? `REMOTE RESPONSE ${validation.status_code}`
                   : "POSSIBLE 404 OR DEAD ROUTE",
-                variant: "danger",
+                variant: "danger" as FlagVariant,
+                detail: "Server returned an error or did not respond",
+                points: 0,
+                isSkip: false,
               },
-              { label: "REMOTE TARGET NOT VERIFIED", variant: "danger" },
-              { label: "MANUAL CHECK RECOMMENDED", variant: "warn" },
+              { label: "REMOTE TARGET NOT VERIFIED", variant: "danger" as FlagVariant, detail: "TLS and header checks could not complete", points: 0, isSkip: false },
+              { label: "MANUAL CHECK RECOMMENDED", variant: "warn" as FlagVariant, detail: "Verify the link independently before sharing", points: 0, isSkip: false },
             ];
 
   const errorTitle =
@@ -1124,13 +1133,30 @@ export default function ProjectOverlay({
 
               {openSection === "diagnostics" && (
                 <div className="section-body">
-                  <div className="flags-list">
-                    {diagnosticFlags.map((flag) => (
-                      <span className={`flag flag-${flag.variant}`} key={flag.label}>
-                        {flag.label}
-                      </span>
+                  <div className="signals-detail-list">
+                    {diagnosticFlags.map((flag, i) => (
+                      <div
+                        key={i}
+                        className={`signal-detail-row ${flag.isSkip ? "signal-detail-row--skip" : `signal-detail-row--${flag.variant}`}`}
+                      >
+                        <span className="signal-detail-icon">
+                          {flag.isSkip ? "—" : flag.variant === "safe" ? "✓" : flag.variant === "danger" ? "✗" : flag.variant === "warn" ? "!" : "·"}
+                        </span>
+                        <div className="signal-detail-content">
+                          <span className="signal-detail-label">{flag.label}</span>
+                          <span className="signal-detail-text">{flag.detail}</span>
+                        </div>
+                        {flag.points > 0 && (
+                          <span className="signal-detail-points">+{flag.points}</span>
+                        )}
+                      </div>
                     ))}
                   </div>
+                  {previewState === "ready" && validation?.id === null && (
+                    <p className="signals-local-note">
+                      Score not saved — deploy backend to enable scan history.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
