@@ -381,6 +381,20 @@ export default function ProjectOverlay({
           ? "MEDIUM"
           : "LOW";
 
+  const passCount = validation?.signals?.filter((s) => s.status === "pass").length ?? 0;
+  const failWarnCount = validation?.signals?.filter((s) => s.status === "fail" || s.status === "warn").length ?? 0;
+  const skipCount = validation?.signals?.filter((s) => s.status === "skip").length ?? 0;
+  const keyIssues = validation?.signals?.filter((s) => s.status === "fail" || s.status === "warn").slice(0, 3) ?? [];
+
+  const verdictAdvice =
+    trustLevel === "HIGH"
+      ? "All or most safety checks passed — this link appears trustworthy based on automated analysis."
+      : trustLevel === "MEDIUM"
+        ? "Some checks flagged issues. Review the safety signals before opening, especially any HTTPS or redirect warnings."
+        : trustLevel === "LOW"
+          ? "Multiple checks failed. This link may be unsafe or unreachable — verify it through an independent source before proceeding."
+          : null;
+
   const projectCode =
     project?.slug && project?.domain
       ? `PROJECT LINK: ${project.domain.toUpperCase()}${project.slug.toUpperCase()}`
@@ -1309,7 +1323,80 @@ export default function ProjectOverlay({
                         {recommendation}
                       </span>
                     </div>
+
+                    {previewState === "ready" && trustScore !== null && (
+                      <div className="conclusion-row">
+                        <span className="conclusion-label">TRUST LEVEL</span>
+                        <span
+                          className={`conclusion-value verdict-trust-level--${trustLevel.toLowerCase()}`}
+                        >
+                          {trustLevel}
+                        </span>
+                      </div>
+                    )}
                   </div>
+
+                  {previewState === "ready" && trustScore !== null && (
+                    <>
+                      {/* Score bar */}
+                      <div className="verdict-score-section">
+                        <div className="verdict-score-header">
+                          <span className="verdict-score-label">TRUST SCORE</span>
+                          <span className="verdict-score-value">{trustScore}/100</span>
+                        </div>
+                        <div className="verdict-score-track">
+                          <div
+                            className={`verdict-score-fill verdict-score-fill--${trustLevel.toLowerCase()}`}
+                            style={{ width: `${trustScore}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Checks summary */}
+                      <div className="verdict-checks-row">
+                        <div className="verdict-check-cell">
+                          <span className="verdict-check-num verdict-check-num--pass">{passCount}</span>
+                          <span className="verdict-check-desc">PASSED</span>
+                        </div>
+                        <div className="verdict-check-cell">
+                          <span className="verdict-check-num verdict-check-num--fail">{failWarnCount}</span>
+                          <span className="verdict-check-desc">FLAGGED</span>
+                        </div>
+                        {skipCount > 0 && (
+                          <div className="verdict-check-cell">
+                            <span className="verdict-check-num verdict-check-num--skip">{skipCount}</span>
+                            <span className="verdict-check-desc">SKIPPED</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Key issues */}
+                      {keyIssues.length > 0 && (
+                        <div className="verdict-issues">
+                          <span className="verdict-issues-title">KEY ISSUES</span>
+                          {keyIssues.map((issue) => (
+                            <div
+                              key={issue.id}
+                              className={`verdict-issue ${issue.status === "fail" ? "verdict-issue--danger" : "verdict-issue--warn"}`}
+                            >
+                              <span className="verdict-issue-icon">
+                                {issue.status === "fail" ? "✗" : "!"}
+                              </span>
+                              <div className="verdict-issue-body">
+                                <span className="verdict-issue-label">{issue.label}</span>
+                                <span className="verdict-issue-detail">{issue.detail}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Level advice */}
+                      {verdictAdvice && (
+                        <p className="verdict-advice">{verdictAdvice}</p>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
