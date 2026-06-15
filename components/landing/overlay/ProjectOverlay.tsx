@@ -20,22 +20,43 @@ type ProjectOverlayProps = {
   onClose: () => void;
 };
 
-type SectionKey = "overview" | "diagnostics" | "recommendation" | "redirects";
+type SectionKey = "overview" | "diagnostics" | "headers" | "recommendation" | "redirects";
 
 type PreviewState = "loading" | "ready" | "broken" | "missing";
 
+type Signal = {
+  id: string;
+  label: string;
+  status: "pass" | "fail" | "warn" | "info" | "skip";
+  detail: string;
+  points: number;
+};
+
 type ValidationResult = {
-  ok: boolean;
-  isWorking?: boolean;
-  isReachable?: boolean;
-  statusCode?: number;
-  statusText?: string;
-  finalUrl?: string;
-  contentType?: string | null;
+  id?: number | null;
+  url?: string;
+  final_url?: string;
+  score?: number;
+  level?: "good" | "caution" | "high_caution" | "unknown";
+  https?: boolean;
+  reachable?: boolean;
+  status_code?: number | null;
+  redirect_count?: number | null;
+  has_cross_domain_redirect?: boolean | null;
+  response_time_ms?: number | null;
+  tls_valid?: boolean | null;
+  tls_expired?: boolean | null;
+  headers?: {
+    hsts: boolean | null;
+    csp: boolean | null;
+    x_frame_options: boolean | null;
+    referrer_policy: boolean | null;
+    permissions_policy: boolean | null;
+  } | null;
+  signals?: Signal[];
+  redirect_chain?: string[];
+  scanned_at?: string;
   error?: string;
-  link?: string;
-  redirectChain?: string[];
-  responseTime?: number;
 };
 
 type FlagVariant = "safe" | "warn" | "danger" | "neutral";
@@ -45,7 +66,7 @@ type DiagnosticFlag = {
   variant: FlagVariant;
 };
 
-const VALIDATION_ENDPOINT = "/digitalhub/api/validate";
+const SCAN_ENDPOINT = "/digitalhub/api/scan";
 
 export default function ProjectOverlay({
   project,
@@ -121,8 +142,6 @@ export default function ProjectOverlay({
   useEffect(() => {
     if (isOpen && project) {
       const isShowcase = project.cardId !== "link-check";
-      // Showcase projects start image loading immediately (background → image fallback).
-      // User-submitted links only load after validation confirms the link is live.
       setIsImageLoading(Boolean(isShowcase ? (project.background || project.image) : project.background));
       setImageError(false);
       setIsNavigating(false);
@@ -240,29 +259,31 @@ export default function ProjectOverlay({
       setIsImageLoading(false);
 
       try {
-        const response = await fetch(
-          `${VALIDATION_ENDPOINT}?url=${encodeURIComponent(project.link ?? "")}`,
-          { signal: controller.signal },
-        );
+        const response = await fetch(SCAN_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: project.link }),
+          signal: controller.signal,
+        });
 
         const data: ValidationResult = await response.json();
 
         if (cancelled) return;
 
-        setValidation(data);
-
-        // Only start the image spinner here for live screenshots.
-        // Background images already started loading on open.
-        if (data.isWorking && !project?.background) {
-          setIsImageLoading(true);
+        if (!response.ok || data.error) {
+          setValidation({ error: data.error ?? "Scan failed", reachable: false });
+        } else {
+          setValidation(data);
+          if (data.reachable && !project?.background) {
+            setIsImageLoading(true);
+          }
         }
       } catch (error) {
         if (cancelled || controller.signal.aborted) return;
 
         setValidation({
-          ok: false,
-          isWorking: false,
           error: error instanceof Error ? error.message : "Validation failed",
+          reachable: false,
         });
       } finally {
         if (!cancelled && !controller.signal.aborted) {
@@ -283,8 +304,6 @@ export default function ProjectOverlay({
     };
   }, [isOpen, project?.link, project?.cardId]);
 
-  // Links scanned via the LinkChecker bar get the safety disclaimer on open.
-  // Curated projects in lib/projects.ts (cardId !== "link-check") skip it.
   const isUserLink = project?.cardId === "link-check";
 
   const proceedWithNavigation = () => {
@@ -317,7 +336,6 @@ export default function ProjectOverlay({
 
   const screenshotUrl = useMemo(() => {
     if (!project?.link) return "";
-    // Static background image takes priority over a live microlink capture.
     if (project.background) return project.background;
     return `https://api.microlink.io/?url=${encodeURIComponent(
       project.link,
@@ -325,7 +343,7 @@ export default function ProjectOverlay({
   }, [project?.link, project?.background]);
 
   const hasLink = Boolean(project?.link);
-  const isLinkWorking = Boolean(validation?.isWorking);
+  const isLinkWorking = Boolean(validation?.reachable);
 
   const previewState: PreviewState = !hasLink
     ? "missing"
@@ -339,47 +357,24 @@ export default function ProjectOverlay({
   const isBrokenState = previewState === "broken";
 
   const isHttps = Boolean(
-    project?.link?.startsWith("https://") ||
-      validation?.finalUrl?.startsWith("https://"),
+    validation?.https ?? project?.link?.startsWith("https://"),
   );
 
-  const hasRedirect = Boolean(
-    validation?.finalUrl &&
-      project?.link &&
-      validation.finalUrl !== project.link,
-  );
+  const hasRedirect = (validation?.redirect_count ?? 0) > 0;
+  const hasCrossDomainRedirect = Boolean(validation?.has_cross_domain_redirect);
 
-  // Only cross-domain redirects (e.g. google.com → evil.com) are suspicious.
-  // Same-domain redirects (www ↔ non-www, trailing slash) are routine and safe.
-  const hasCrossDomainRedirect = useMemo(() => {
-    if (!validation?.redirectChain || validation.redirectChain.length < 2) return false;
-    try {
-      const firstHost = new URL(validation.redirectChain[0]).hostname.replace(/^www\./, "");
-      const lastHost = new URL(validation.redirectChain[validation.redirectChain.length - 1]).hostname.replace(/^www\./, "");
-      return firstHost !== lastHost;
-    } catch {
-      return false;
-    }
-  }, [validation?.redirectChain]);
-
-  // Max achievable score is 85. Automated checks cannot guarantee content safety,
-  // so 100 is intentionally unreachable.
-  const trustScore: number | null = useMemo(() => {
-    if (!hasLink || isValidating || !validation) return null;
-    let score = 0;
-    if (isHttps) score += 30;
-    if (validation.isWorking) score += 25;
-    if (!hasCrossDomainRedirect) score += 15;
-    if (validation.statusCode === 200) score += 15;
-    return score; // max 85
-  }, [hasLink, isValidating, validation, isHttps, hasCrossDomainRedirect]);
+  // Score and level come from the server
+  const trustScore: number | null =
+    !hasLink || isValidating || validation?.score === undefined
+      ? null
+      : validation.score;
 
   const trustLevel =
     trustScore === null
       ? "SCANNING"
-      : trustScore >= 70
+      : validation?.level === "good"
         ? "HIGH"
-        : trustScore >= 45
+        : validation?.level === "caution"
           ? "MEDIUM"
           : "LOW";
 
@@ -413,39 +408,23 @@ export default function ProjectOverlay({
         ? "ADD A VALID LINK"
         : "VERIFY ROUTE OR PAGE";
 
+  // Map server signals → diagnostic flags; fall back to placeholder sets while
+  // loading / broken / missing so the flags panel always has content.
+  const signalToFlag = (s: Signal): DiagnosticFlag => ({
+    label: s.label.toUpperCase(),
+    variant:
+      s.status === "pass"
+        ? "safe"
+        : s.status === "fail"
+          ? "danger"
+          : s.status === "warn"
+            ? "warn"
+            : "neutral",
+  });
+
   const diagnosticFlags: DiagnosticFlag[] =
-    previewState === "ready" && validation
-      ? [
-          {
-            label: isHttps ? "HTTPS: ENCRYPTED CONNECTION" : "HTTP: NO ENCRYPTION",
-            variant: isHttps ? "safe" : "danger",
-          },
-          {
-            label: `HTTP ${validation.statusCode ?? "---"}: ${validation.statusText ?? "OK"}`,
-            variant:
-              validation.statusCode === 200
-                ? "safe"
-                : validation.statusCode && validation.statusCode < 400
-                  ? "safe"
-                  : validation.statusCode && validation.statusCode < 500
-                    ? "warn"
-                    : "danger",
-          },
-          {
-            label: !hasRedirect
-              ? "NO REDIRECT DETECTED"
-              : hasCrossDomainRedirect
-                ? "CROSS-DOMAIN REDIRECT DETECTED"
-                : "SAME-DOMAIN REDIRECT (NORMAL)",
-            variant: !hasRedirect ? "safe" : hasCrossDomainRedirect ? "danger" : "warn",
-          },
-          {
-            label: validation.contentType
-              ? `TYPE: ${validation.contentType.split(";")[0].trim().toUpperCase()}`
-              : "CONTENT TYPE UNKNOWN",
-            variant: validation.contentType ? "neutral" : "warn",
-          },
-        ]
+    previewState === "ready" && validation?.signals?.length
+      ? validation.signals.filter((s) => s.status !== "skip").map(signalToFlag)
       : previewState === "loading"
         ? [
             { label: "PREVIEW REQUEST QUEUED", variant: "neutral" },
@@ -463,8 +442,8 @@ export default function ProjectOverlay({
           : [
               { label: "PREVIEW CAPTURE FAILED", variant: "danger" },
               {
-                label: validation?.statusCode
-                  ? `REMOTE RESPONSE ${validation.statusCode}`
+                label: validation?.status_code
+                  ? `REMOTE RESPONSE ${validation.status_code}`
                   : "POSSIBLE 404 OR DEAD ROUTE",
                 variant: "danger",
               },
@@ -483,7 +462,7 @@ export default function ProjectOverlay({
     previewState === "missing"
       ? "LINK NOT PROVIDED"
       : previewState === "broken"
-        ? validation?.finalUrl ||
+        ? validation?.final_url ||
           validation?.error ||
           "Possible 404, bad route, blocked page, or unavailable screenshot source."
         : project?.link || "NO LINK AVAILABLE";
@@ -765,7 +744,7 @@ export default function ProjectOverlay({
                         }
                 }
               >
-                TRUST: {trustScore}/85
+                TRUST: {trustScore}/100
               </span>
             )}
             <div className="threat-title-stack">
@@ -948,7 +927,7 @@ export default function ProjectOverlay({
                   {isValidating
                     ? "SCANNING"
                     : trustScore !== null
-                      ? `${trustScore}/85`
+                      ? `${trustScore}/100`
                       : "N/A"}
                 </span>
               </div>
@@ -995,15 +974,16 @@ export default function ProjectOverlay({
               <span className="hero-summary-kicker">LINK ANALYSIS</span>
               <p className="hero-summary-text">
                 {previewState === "ready"
-                  ? `Trust score ${trustScore ?? 0}/85 — review the safety flags and redirect data below before opening this link.`
+                  ? `Trust score ${trustScore ?? 0}/100 — review the safety signals and redirect data below before opening this link.`
                   : previewState === "loading"
-                    ? "Real-time analysis in progress. Scanning the link for safety signals, HTTPS status, and redirect chains."
+                    ? "Real-time analysis in progress. Scanning the link for safety signals, HTTPS status, TLS certificate, security headers, and redirect chains."
                     : previewState === "missing"
                       ? "No link provided for this project. Preview and safety checks cannot run without a target URL."
-                      : "Link validation failed. The target may be unreachable, returning an error, or blocking automated access. Check the safety flags for details."}
+                      : "Link validation failed. The target may be unreachable, returning an error, or blocking automated access. Check the safety signals for details."}
               </p>
             </div>
 
+            {/* ── LINK IDENTIFICATION ───────────────────────────────────── */}
             <div className="data-section">
               <button
                 type="button"
@@ -1051,7 +1031,7 @@ export default function ProjectOverlay({
                     <div className="data-field">
                       <span className="field-label">LINK</span>
                       <span className="field-value mono">
-                        {validation?.finalUrl ||
+                        {validation?.final_url ||
                           project.link ||
                           "NO LINK AVAILABLE"}
                       </span>
@@ -1074,36 +1054,56 @@ export default function ProjectOverlay({
                           : !hasRedirect
                             ? "NONE DETECTED"
                             : hasCrossDomainRedirect
-                              ? `CROSS-DOMAIN → ${(validation?.finalUrl ?? "").slice(0, 24)}…`
-                              : `SAME-DOMAIN → ${(validation?.finalUrl ?? "").slice(0, 25)}…`}
+                              ? `CROSS-DOMAIN → ${(validation?.final_url ?? "").slice(0, 24)}…`
+                              : `SAME-DOMAIN → ${(validation?.final_url ?? "").slice(0, 25)}…`}
                       </span>
                     </div>
 
-                    {validation?.responseTime !== undefined && (
-                      <div className="data-field">
-                        <span className="field-label">RESPONSE</span>
-                        <span
-                          className={`field-value ${
-                            validation.responseTime < 1000
-                              ? "status-ready"
-                              : validation.responseTime < 3000
-                                ? ""
-                                : "offline"
-                          }`}
-                        >
-                          {validation.responseTime < 1000
-                            ? `${validation.responseTime}ms ✓`
-                            : validation.responseTime < 3000
-                              ? `${validation.responseTime}ms`
-                              : `${(validation.responseTime / 1000).toFixed(1)}s SLOW`}
-                        </span>
-                      </div>
-                    )}
+                    {validation?.tls_valid !== undefined &&
+                      validation.tls_valid !== null && (
+                        <div className="data-field">
+                          <span className="field-label">TLS CERT</span>
+                          <span
+                            className={`field-value ${
+                              validation.tls_valid ? "status-ready" : "offline"
+                            }`}
+                          >
+                            {validation.tls_valid
+                              ? "VALID ✓"
+                              : validation.tls_expired
+                                ? "EXPIRED"
+                                : "INVALID"}
+                          </span>
+                        </div>
+                      )}
+
+                    {validation?.response_time_ms !== undefined &&
+                      validation.response_time_ms !== null && (
+                        <div className="data-field">
+                          <span className="field-label">RESPONSE</span>
+                          <span
+                            className={`field-value ${
+                              validation.response_time_ms < 1000
+                                ? "status-ready"
+                                : validation.response_time_ms < 3000
+                                  ? ""
+                                  : "offline"
+                            }`}
+                          >
+                            {validation.response_time_ms < 1000
+                              ? `${validation.response_time_ms}ms ✓`
+                              : validation.response_time_ms < 3000
+                                ? `${validation.response_time_ms}ms`
+                                : `${(validation.response_time_ms / 1000).toFixed(1)}s SLOW`}
+                          </span>
+                        </div>
+                      )}
                   </div>
                 </div>
               )}
             </div>
 
+            {/* ── SAFETY SIGNALS ────────────────────────────────────────── */}
             <div className="data-section">
               <button
                 type="button"
@@ -1115,7 +1115,7 @@ export default function ProjectOverlay({
               >
                 <span className="section-title-wrap">
                   <span className="section-icon">◆</span>
-                  <span className="section-title">SAFETY FLAGS</span>
+                  <span className="section-title">SAFETY SIGNALS</span>
                 </span>
                 <span className="section-chevron">
                   {openSection === "diagnostics" ? "−" : "+"}
@@ -1135,7 +1135,8 @@ export default function ProjectOverlay({
               )}
             </div>
 
-            {validation?.redirectChain && validation.redirectChain.length > 1 && (
+            {/* ── REDIRECT CHAIN ────────────────────────────────────────── */}
+            {validation?.redirect_chain && validation.redirect_chain.length > 1 && (
               <div className="data-section">
                 <button
                   type="button"
@@ -1157,19 +1158,19 @@ export default function ProjectOverlay({
                 {openSection === "redirects" && (
                   <div className="section-body">
                     <div className="redirect-chain">
-                      {validation.redirectChain.map((hopUrl, i) => (
+                      {validation.redirect_chain.map((hopUrl, i) => (
                         <div key={i} className="redirect-step">
                           <span className="redirect-step-index">
                             {String(i + 1).padStart(2, "0")}
                           </span>
                           <span
                             className={`redirect-step-url ${
-                              i === validation.redirectChain!.length - 1 ? "is-final" : ""
+                              i === validation.redirect_chain!.length - 1 ? "is-final" : ""
                             }`}
                           >
                             {hopUrl}
                           </span>
-                          {i < validation.redirectChain!.length - 1 && (
+                          {i < validation.redirect_chain!.length - 1 && (
                             <span className="redirect-arrow">↓</span>
                           )}
                         </div>
@@ -1180,6 +1181,60 @@ export default function ProjectOverlay({
               </div>
             )}
 
+            {/* ── SECURITY HEADERS ──────────────────────────────────────── */}
+            {previewState === "ready" && validation?.headers && (
+              <div className="data-section">
+                <button
+                  type="button"
+                  className={`section-header clickable ${
+                    openSection === "headers" ? "active" : ""
+                  }`}
+                  onClick={() => toggleSection("headers")}
+                  aria-expanded={openSection === "headers"}
+                >
+                  <span className="section-title-wrap">
+                    <span className="section-icon">◆</span>
+                    <span className="section-title">SECURITY HEADERS</span>
+                  </span>
+                  <span className="section-chevron">
+                    {openSection === "headers" ? "−" : "+"}
+                  </span>
+                </button>
+
+                {openSection === "headers" && (
+                  <div className="section-body">
+                    <div className="data-grid-2col">
+                      {(
+                        [
+                          { label: "HSTS", value: validation.headers.hsts },
+                          { label: "CSP", value: validation.headers.csp },
+                          { label: "X-FRAME-OPTIONS", value: validation.headers.x_frame_options },
+                          { label: "REFERRER-POLICY", value: validation.headers.referrer_policy },
+                          { label: "PERMISSIONS-POLICY", value: validation.headers.permissions_policy },
+                        ] as { label: string; value: boolean | null }[]
+                      ).map(({ label, value }) => (
+                        <div className="data-field" key={label}>
+                          <span className="field-label">{label}</span>
+                          <span
+                            className={`field-value ${
+                              value === true
+                                ? "status-ready"
+                                : value === false
+                                  ? "offline"
+                                  : ""
+                            }`}
+                          >
+                            {value === null ? "N/A" : value ? "PRESENT ✓" : "MISSING"}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── VERDICT & ACTION ──────────────────────────────────────── */}
             <div className="data-section">
               <button
                 type="button"
@@ -1295,7 +1350,6 @@ export default function ProjectOverlay({
                       : "0 0 50px rgba(239, 68, 68, 0.14), 0 28px 64px rgba(0,0,0,0.65)",
               }}
             >
-              {/* X — dismiss without navigating */}
               <button
                 className="safety-disclaimer-close"
                 onClick={() => setShowDisclaimer(false)}
@@ -1332,19 +1386,18 @@ export default function ProjectOverlay({
                           : "#ffd6d5",
                   }}
                 >
-                  {trustScore}/85
+                  {trustScore}/100
                 </span>
                 &nbsp;&nbsp;·&nbsp;&nbsp;{trustLevel}
               </div>
 
               <p className="safety-disclaimer-text">
-                Score is capped at&nbsp;<strong>85</strong> by design.
-                Automated checks cover HTTPS, reachability, and redirect
-                patterns only — they cannot assess content, intent, or
+                Score is out of&nbsp;<strong>100</strong>. Checks cover HTTPS,
+                reachability, TLS certificate validity, redirect chains, and
+                security headers — they cannot assess content, intent, or
                 legitimacy. Verify the link independently before proceeding.
               </p>
 
-              {/* Third-party verification services */}
               <div className="safety-verify-section">
                 <span className="safety-verify-label">VERIFY INDEPENDENTLY</span>
                 <div className="safety-verify-links">
