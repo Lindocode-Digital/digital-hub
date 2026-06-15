@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import tls from "node:tls";
 
 const UPSTREAM =
-  process.env.SCAN_API_URL ?? "https://api.lindocode.com/api/lazy-appz/scan";
+  process.env.SCAN_API_URL ?? "https://api.lazy-appz.lindocode.com/api/lazy-appz/scan";
 
 type SignalStatus = "pass" | "fail" | "warn" | "info" | "skip";
 interface Signal {
