@@ -714,7 +714,7 @@ export default function ProjectOverlay({
                   disabled={isNavigating}
                   type="button"
                 >
-                  VISIT PROJECT ↗
+                  VISIT PROJECT
                 </button>
               ) : (
                 <button
@@ -1674,7 +1674,7 @@ export default function ProjectOverlay({
               <p className="safety-disclaimer-text">
                 Score is out of&nbsp;<strong>100</strong>. Checks cover HTTPS,
                 reachability, TLS certificate validity, redirect chains, and
-                security headers — they cannot assess content, intent, or
+                security headers - they cannot assess content, intent, or
                 legitimacy. Verify the link independently before proceeding.
               </p>
 
@@ -1744,7 +1744,7 @@ export default function ProjectOverlay({
                           : "linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.06))",
                   }}
                 >
-                  OPEN IN NEW TAB ↗
+                  OPEN IN NEW TAB
                 </button>
 
                 <button
@@ -1752,7 +1752,7 @@ export default function ProjectOverlay({
                   onClick={() => setShowDisclaimer(false)}
                   type="button"
                 >
-                  Cancel — go back
+                  Cancel - Go Back
                 </button>
               </div>
             </div>
