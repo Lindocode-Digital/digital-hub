@@ -80,7 +80,7 @@ export const projects: Project[] = [
     slug: "/",
     domain: "lazystore.lindocode.com",
     title: "LazyStore",
-    cardTitle: "LazyStore™",
+    cardTitle: "LazyStore",
     cardSubtitle: "Books",
     description: [
       "Books. Ready in one scan.",
@@ -106,7 +106,7 @@ export const projects: Project[] = [
     slug: "/",
     domain: "lazyreader.lindocode.com",
     title: "LazyReader",
-    cardTitle: "LAZYREADER",
+    cardTitle: "LazyReader",
     cardSubtitle: "Mobile",
     description: [
       "Reading Experience",
@@ -132,7 +132,7 @@ export const projects: Project[] = [
     slug: "/",
     domain: "lazyauthor.lindocode.com",
     title: "LazyAuthor",
-    cardTitle: "LAZYAUTHOR",
+    cardTitle: "LazyAuthor",
     cardSubtitle: "Writing",
     description: [
       "Art of Storytelling",
