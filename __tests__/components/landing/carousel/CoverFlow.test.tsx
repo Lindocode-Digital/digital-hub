@@ -49,10 +49,13 @@ const covers: Project[] = [
   },
 ];
 
+const getCards = (container: HTMLElement) =>
+  Array.from(container.querySelectorAll<HTMLElement>(".coverflow-card"));
+
 describe("CoverFlow — rendering", () => {
   it("renders all cover cards", () => {
-    render(<CoverFlow covers={covers} />);
-    expect(screen.getAllByRole("button")).toHaveLength(covers.length);
+    const { container } = render(<CoverFlow covers={covers} />);
+    expect(getCards(container)).toHaveLength(covers.length);
   });
 
   it("renders each cover title", () => {
@@ -68,33 +71,48 @@ describe("CoverFlow — rendering", () => {
   });
 
   it("renders no cards when covers array is empty", () => {
-    render(<CoverFlow covers={[]} />);
-    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    const { container } = render(<CoverFlow covers={[]} />);
+    expect(getCards(container)).toHaveLength(0);
+  });
+
+  it("renders prev/next nav buttons when there are adjacent cards", () => {
+    render(<CoverFlow covers={covers} />);
+    expect(screen.getByRole("button", { name: /previous project/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /next project/i })).toBeInTheDocument();
+  });
+
+  it("hides the prev nav button at the first card", () => {
+    render(<CoverFlow covers={covers} />);
+    fireEvent.click(screen.getByRole("button", { name: /previous project/i }));
+    expect(screen.queryByRole("button", { name: /previous project/i })).toBeNull();
+  });
+
+  it("hides the next nav button at the last card", () => {
+    render(<CoverFlow covers={covers} />);
+    fireEvent.click(screen.getByRole("button", { name: /next project/i }));
+    expect(screen.queryByRole("button", { name: /next project/i })).toBeNull();
   });
 });
 
 describe("CoverFlow — card selection", () => {
   it("marks exactly one card as active initially", () => {
-    render(<CoverFlow covers={covers} />);
-    const buttons = screen.getAllByRole("button");
-    const activeCards = buttons.filter((b) => b.classList.contains("active"));
+    const { container } = render(<CoverFlow covers={covers} />);
+    const activeCards = getCards(container).filter((b) => b.classList.contains("active"));
     expect(activeCards).toHaveLength(1);
   });
 
   it("clicking an inactive card makes it active", () => {
-    render(<CoverFlow covers={covers} />);
-    const buttons = screen.getAllByRole("button");
-    const inactiveCard = buttons.find((b) => !b.classList.contains("active"))!;
+    const { container } = render(<CoverFlow covers={covers} />);
+    const inactiveCard = getCards(container).find((b) => !b.classList.contains("active"))!;
     fireEvent.click(inactiveCard);
     expect(inactiveCard).toHaveClass("active");
   });
 
   it("only one card is active after clicking a different card", () => {
-    render(<CoverFlow covers={covers} />);
-    const buttons = screen.getAllByRole("button");
-    const inactiveCard = buttons.find((b) => !b.classList.contains("active"))!;
+    const { container } = render(<CoverFlow covers={covers} />);
+    const inactiveCard = getCards(container).find((b) => !b.classList.contains("active"))!;
     fireEvent.click(inactiveCard);
-    const activeCards = screen.getAllByRole("button").filter((b) => b.classList.contains("active"));
+    const activeCards = getCards(container).filter((b) => b.classList.contains("active"));
     expect(activeCards).toHaveLength(1);
   });
 });
