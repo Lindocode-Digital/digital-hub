@@ -1,1 +1,1 @@
-npm test
+# Tests run on pre-push, not pre-commit (see .husky/pre-push)

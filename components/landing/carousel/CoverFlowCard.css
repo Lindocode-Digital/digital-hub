@@ -3,6 +3,8 @@
   width: 200px;
   aspect-ratio: 1;
   cursor: pointer;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   transition:
     transform 0.5s ease,
     z-index 0.5s ease,

@@ -705,6 +705,43 @@ export default function ProjectOverlay({
                 </div>
               </div>
 
+              {project.playStoreLink && (
+                <a
+                  href={project.playStoreLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="google-play-badge"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 512 512"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M79 39c-6 6-9 15-9 27v380c0 12 3 21 9 27l3 2 213-213v-5L82 37z"
+                      fill="#00d2ff"
+                    />
+                    <path
+                      d="M366 324l-71-71v-5l71-71 3 2 84 48c24 14 24 36 0 50z"
+                      fill="#ffcf00"
+                    />
+                    <path
+                      d="M369 322 295 248 82 461c8 8 21 9 35 1z"
+                      fill="#ff3a56"
+                    />
+                    <path
+                      d="M369 174 117 30c-14-8-27-7-35 1l213 213z"
+                      fill="#00e678"
+                    />
+                  </svg>
+                  <span className="google-play-badge-text">
+                    <small>Get it on</small>
+                    <strong>Google Play</strong>
+                  </span>
+                </a>
+              )}
+
               {project.link ? (
                 <button
                   className="threat-enter-link is-safe"

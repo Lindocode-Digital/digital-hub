@@ -44,8 +44,8 @@ describe("projects array", () => {
     expect(projects.length).toBeGreaterThan(0);
   });
 
-  it("has exactly 5 projects", () => {
-    expect(projects).toHaveLength(5);
+  it("has exactly 4 projects", () => {
+    expect(projects).toHaveLength(4);
   });
 
   it("every project has a unique cardId", () => {

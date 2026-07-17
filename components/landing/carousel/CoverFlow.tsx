@@ -22,7 +22,7 @@ export default function CoverFlow({ covers }: CoverFlowProps) {
   const router = useRouter();
   const navigatingRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(() =>
-    covers.length > 1 ? 2 : 0,
+    covers.length > 1 ? 1 : 0,
   );
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
@@ -75,9 +75,40 @@ export default function CoverFlow({ covers }: CoverFlowProps) {
     setTimeout(() => setSelectedProject(null), 300);
   };
 
+  const hasPrev = activeIndex > 0;
+  const hasNext = activeIndex < covers.length - 1;
+
+  const goPrev = () => {
+    if (hasPrev) setActiveIndex((i) => i - 1);
+  };
+
+  const goNext = () => {
+    if (hasNext) setActiveIndex((i) => i + 1);
+  };
+
   return (
     <>
       <div className="coverflow-wrapper">
+        {hasPrev && (
+          <button
+            type="button"
+            className="coverflow-nav coverflow-nav-prev"
+            onClick={goPrev}
+            aria-label="Previous project"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path
+                d="M15 5l-7 7 7 7"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
+
         {covers.map((cover, index) => {
           const offset = index - activeIndex;
           const isActive = index === activeIndex;
@@ -95,6 +126,26 @@ export default function CoverFlow({ covers }: CoverFlowProps) {
             />
           );
         })}
+
+        {hasNext && (
+          <button
+            type="button"
+            className="coverflow-nav coverflow-nav-next"
+            onClick={goNext}
+            aria-label="Next project"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path
+                d="M9 5l7 7-7 7"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       <ProjectOverlay
