@@ -17,6 +17,8 @@ export interface AssistantTopic {
   boost?: number;
   summary?: string;
   answer: string;
+  /** Ordered walkthrough, for surfaces with room to show one. */
+  steps?: string[];
   details?: string[];
   suggestions: AssistantSuggestion[];
 }
@@ -33,6 +35,7 @@ export interface AssistantAnswer {
   id: string;
   title: string;
   answer: string;
+  steps?: string[];
   details?: string[];
   suggestions: AssistantSuggestion[];
 }

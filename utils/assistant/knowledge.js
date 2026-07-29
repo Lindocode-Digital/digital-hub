@@ -11,7 +11,7 @@
  */
 
 export const BUNDLED_KNOWLEDGE = {
-  "version": 2,
+  "version": 3,
   "updated_at": "2026-07-29",
   "links": {
     "about": "https://lindocode.com/#about",
@@ -1146,12 +1146,12 @@ export const BUNDLED_KNOWLEDGE = {
           "topic": "la-book-editor"
         },
         {
-          "label": "Exporting",
-          "topic": "la-export"
+          "label": "Worked examples",
+          "topic": "la-workflow-name"
         },
         {
-          "label": "Saving your work",
-          "topic": "la-account"
+          "label": "Writing tips",
+          "topic": "la-tips"
         },
         {
           "label": "Open LazyAuthor",
@@ -1164,14 +1164,10 @@ export const BUNDLED_KNOWLEDGE = {
       "title": "Story Editor",
       "terms": [
         "story editor",
-        "scene",
         "branch",
         "branching",
         "branching story",
         "branching fiction",
-        "variable",
-        "condition",
-        "player input",
         "ending",
         "write interactive",
         "write a story",
@@ -1188,16 +1184,24 @@ export const BUNDLED_KNOWLEDGE = {
       ],
       "suggestions": [
         {
-          "label": "Book editor instead",
-          "topic": "la-book-editor"
+          "label": "Variables",
+          "topic": "la-variables"
         },
         {
-          "label": "Exporting",
-          "topic": "la-export"
+          "label": "Conditions",
+          "topic": "la-conditions"
         },
         {
-          "label": "What is interactive fiction?",
-          "topic": "interactive-fiction"
+          "label": "Player input",
+          "topic": "la-player-input"
+        },
+        {
+          "label": "Media",
+          "topic": "la-media"
+        },
+        {
+          "label": "Worked examples",
+          "topic": "la-workflow-name"
         }
       ]
     },
@@ -1206,14 +1210,10 @@ export const BUNDLED_KNOWLEDGE = {
       "title": "Book Editor",
       "terms": [
         "book editor",
-        "chapter",
         "table of contents",
         "toc",
-        "cover art",
-        "cover image",
         "write a book",
         "novel",
-        "prologue",
         "manuscript"
       ],
       "boost": 2,
@@ -1226,16 +1226,24 @@ export const BUNDLED_KNOWLEDGE = {
       ],
       "suggestions": [
         {
-          "label": "Story editor instead",
-          "topic": "la-story-editor"
+          "label": "Chapters",
+          "topic": "la-chapters"
+        },
+        {
+          "label": "Book details",
+          "topic": "la-meta"
+        },
+        {
+          "label": "Images",
+          "topic": "la-media"
+        },
+        {
+          "label": "Theming",
+          "topic": "la-theme"
         },
         {
           "label": "Exporting",
           "topic": "la-export"
-        },
-        {
-          "label": "Publishing",
-          "topic": "publishing"
         }
       ]
     },
@@ -1256,25 +1264,25 @@ export const BUNDLED_KNOWLEDGE = {
         "theme my book"
       ],
       "boost": 1,
-      "answer": "Export to EPUB and the file is ready for LazyReader or any other EPUB reader. Import works the other way, so an existing manuscript does not have to be retyped, and preview shows a scene the way a reader will see it.",
+      "answer": "Click Export EPUB and the file is built entirely on your device — no upload, no wait — then downloads named after your title. Import works the other way, so an existing manuscript does not have to be retyped.",
       "details": [
-        "EPUB export for both stories and books",
-        "Import an existing file to keep working on it",
-        "Preview any scene or chapter before exporting",
-        "Themes carry typography and colour into the export"
+        "EPUB 3 containing a cover page, every scene themed, and all media embedded",
+        "A JavaScript runtime ships inside it to handle choices, conditions, effects and input",
+        "Opens fully in LazyReader; other EPUB 3 readers may differ on timed inputs",
+        "Import an existing EPUB to keep working on it — this replaces what is open"
       ],
       "suggestions": [
         {
+          "label": "Importing",
+          "topic": "la-import"
+        },
+        {
+          "label": "Theming",
+          "topic": "la-theme"
+        },
+        {
           "label": "Publishing",
           "topic": "publishing"
-        },
-        {
-          "label": "Reading it back",
-          "topic": "lazyreader"
-        },
-        {
-          "label": "Open LazyAuthor",
-          "link": "lazyAuthor"
         }
       ]
     },
@@ -1309,6 +1317,589 @@ export const BUNDLED_KNOWLEDGE = {
         {
           "label": "Exporting",
           "topic": "la-export"
+        }
+      ]
+    },
+    {
+      "id": "la-variables",
+      "title": "Variables",
+      "terms": [
+        "variable",
+        "variables",
+        "remember",
+        "score",
+        "counter",
+        "stat",
+        "template",
+        "placeholder",
+        "playername",
+        "track a value"
+      ],
+      "boost": 3,
+      "answer": "Variables let a story remember things — the reader's name, a score, whether they picked up a key. Create one in the Variables panel, print it in narrative with {{name}}, and change it with an effect on a choice.",
+      "steps": [
+        "Click Variables in the toolbar, then + Add variable",
+        "Set Name (no spaces, e.g. courage), Label, Type (number or text) and a default",
+        "In any scene body write {{courage}} where the value should appear",
+        "Expand a choice → + Effect → pick the variable, operation and value"
+      ],
+      "details": [
+        "set — assign a fixed value; add / subtract — move a counter; multiply — scale one",
+        "Effects stack on a single choice and run in order",
+        "{{score + 10}} displays arithmetic without changing the stored value",
+        "Short names win: score beats playerCurrentScore when typing conditions"
+      ],
+      "suggestions": [
+        {
+          "label": "Gating with conditions",
+          "topic": "la-conditions"
+        },
+        {
+          "label": "Asking the reader",
+          "topic": "la-player-input"
+        },
+        {
+          "label": "Worked example: a score",
+          "topic": "la-workflow-score"
+        }
+      ]
+    },
+    {
+      "id": "la-conditions",
+      "title": "Conditions",
+      "terms": [
+        "condition",
+        "conditions",
+        "gate",
+        "hide a choice",
+        "operator",
+        "requirement",
+        "only if",
+        "unless"
+      ],
+      "boost": 3,
+      "answer": "A condition hides a choice until a variable meets a threshold — that is how a path stays locked until the reader has earned it.",
+      "steps": [
+        "Expand the choice row",
+        "Click Set condition",
+        "Pick the variable, an operator and the value to compare against",
+        "The choice row then shows the condition as a label"
+      ],
+      "details": [
+        "Operators: eq, ne, gt, gte, lt, lte",
+        "gt 3 is strictly greater than 3 — use gte 3 to include 3",
+        "Always leave one unconditional choice as a fallback: if conditions hide every choice on a scene, the reader is stuck",
+        "Remove condition clears it again"
+      ],
+      "suggestions": [
+        {
+          "label": "Variables",
+          "topic": "la-variables"
+        },
+        {
+          "label": "Worked example: locked door",
+          "topic": "la-workflow-lock"
+        },
+        {
+          "label": "Troubleshooting",
+          "topic": "la-troubleshooting"
+        }
+      ]
+    },
+    {
+      "id": "la-player-input",
+      "title": "Player Input Scenes",
+      "terms": [
+        "player input",
+        "input scene",
+        "ask the reader",
+        "reader types",
+        "prompt",
+        "validation",
+        "wrong answer",
+        "time limit",
+        "attempts",
+        "puzzle"
+      ],
+      "boost": 3,
+      "answer": "A Player Input scene pauses the story, asks the reader to type something, and stores the answer in a variable you can use from then on.",
+      "steps": [
+        "Select the scene and set Scene type to Player input",
+        "Write the Prompt, e.g. “What is your name, traveller?”",
+        "Choose the variable the answer is stored in",
+        "Set Next scene after submit — this clears any leftover choices"
+      ],
+      "details": [
+        "Input type: Text, Number (numeric keypad on mobile) or Password (hidden)",
+        "Validation matches exact, contains or regex, with your own error message",
+        "On wrong answer can branch to a different scene, with a max-attempts cap",
+        "Time limit adds a countdown and an on-timeout scene; a submission cap works the same way"
+      ],
+      "suggestions": [
+        {
+          "label": "Variables",
+          "topic": "la-variables"
+        },
+        {
+          "label": "Worked example: timed puzzle",
+          "topic": "la-workflow-puzzle"
+        },
+        {
+          "label": "Story editor",
+          "topic": "la-story-editor"
+        }
+      ]
+    },
+    {
+      "id": "la-media",
+      "title": "Images, Audio & Video",
+      "terms": [
+        "media",
+        "image",
+        "picture",
+        "photo",
+        "audio",
+        "music",
+        "sound",
+        "video",
+        "upload",
+        "autoplay",
+        "marker",
+        "add audio",
+        "add an image",
+        "add a video",
+        "background music"
+      ],
+      "boost": 2,
+      "answer": "Any scene or chapter can carry images, audio and video. Upload in the Media section, then place it with a marker in the text — or leave the marker out and it appends after the body.",
+      "steps": [
+        "Expand the Media section of the editor",
+        "Upload the file — images (PNG, JPG, WebP, GIF), audio (MP3, OGG, WAV) or video (MP4, WebM)",
+        "Type [image], [audio] or [video] in the body where it should sit",
+        "Use [image2], [image3] for later images"
+      ],
+      "details": [
+        "Everything uploads to cloud storage and is embedded in the exported EPUB",
+        "Audio options: autoplay, loop, and hide controls",
+        "Most browsers and readers block autoplay until the reader has tapped something",
+        "Click × on a thumbnail to remove it"
+      ],
+      "suggestions": [
+        {
+          "label": "Theming the export",
+          "topic": "la-theme"
+        },
+        {
+          "label": "Exporting",
+          "topic": "la-export"
+        }
+      ]
+    },
+    {
+      "id": "la-theme",
+      "title": "Theming The Export",
+      "terms": [
+        "theme",
+        "styling",
+        "style",
+        "font",
+        "typography",
+        "colour",
+        "color",
+        "divider",
+        "appearance",
+        "look"
+      ],
+      "boost": 2,
+      "answer": "The Theme panel controls how the exported EPUB looks, and changes preview in real time when you toggle Preview on any scene.",
+      "details": [
+        "Typography — family, size, line height, colour, alignment, first-line indent",
+        "Scene titles — size, weight, italic, alignment, decorative rules above and below",
+        "Choice buttons — outline or filled, colour, and corner radius from pill to square",
+        "Images — maximum width and alignment; Divider — the symbol [break] renders as, default * * *",
+        "Custom font files are not embedded, so pick a web-safe family like Georgia, serif"
+      ],
+      "suggestions": [
+        {
+          "label": "Previewing",
+          "topic": "la-preview"
+        },
+        {
+          "label": "Exporting",
+          "topic": "la-export"
+        },
+        {
+          "label": "Writing tips",
+          "topic": "la-tips"
+        }
+      ]
+    },
+    {
+      "id": "la-preview",
+      "title": "Previewing",
+      "terms": [
+        "preview",
+        "test",
+        "try it",
+        "see how it looks",
+        "check my story"
+      ],
+      "boost": 2,
+      "answer": "Preview renders a scene the way a reader will see it — narrative, themed choice buttons and inline media. It substitutes variables using their default values, so it is a layout check rather than a full play-through.",
+      "details": [
+        "Conditions are evaluated against defaults, so a gated choice may be hidden here",
+        "A blank default makes {{playerName}} render as nothing — set a test default while writing",
+        "For real branching, export the EPUB and open it in LazyReader",
+        "Click Edit to go back to the editor"
+      ],
+      "suggestions": [
+        {
+          "label": "Exporting",
+          "topic": "la-export"
+        },
+        {
+          "label": "Conditions",
+          "topic": "la-conditions"
+        },
+        {
+          "label": "Troubleshooting",
+          "topic": "la-troubleshooting"
+        }
+      ]
+    },
+    {
+      "id": "la-import",
+      "title": "Importing",
+      "terms": [
+        "import",
+        "existing manuscript",
+        "bring my book",
+        "docx",
+        "word",
+        "migrate",
+        "open an epub"
+      ],
+      "boost": 2,
+      "answer": "You can import an EPUB and carry on working on it. Importing replaces what is currently open, so export first if you want to keep it.",
+      "steps": [
+        "Click your email address in the toolbar → Import EPUB",
+        "Choose the .epub file",
+        "Confirm the replace prompt if the current project has content",
+        "Read and dismiss the yellow banner if anything could not be mapped"
+      ],
+      "details": [
+        "Importing then exporting again migrates an older story to the latest EPUB format",
+        "A .docx splits into chapters on Heading 1 — bold text alone will not be detected",
+        "Your last export is your backup; there is no version history"
+      ],
+      "suggestions": [
+        {
+          "label": "Exporting",
+          "topic": "la-export"
+        },
+        {
+          "label": "Chapters",
+          "topic": "la-chapters"
+        },
+        {
+          "label": "Troubleshooting",
+          "topic": "la-troubleshooting"
+        }
+      ]
+    },
+    {
+      "id": "la-chapters",
+      "title": "Chapters",
+      "terms": [
+        "chapter",
+        "chapters",
+        "reorder",
+        "section break",
+        "break marker",
+        "table of contents",
+        "toc"
+      ],
+      "boost": 3,
+      "answer": "The book editor is chapters and prose — no scene types, variables or choices. Numbers are computed from position, so you never type them yourself.",
+      "steps": [
+        "Click + Add chapter at the bottom of the chapter list",
+        "Click the title field to name it — this feeds the EPUB heading and table of contents",
+        "Hover a row and use ▲ ▼ to reorder, × to delete",
+        "Type [break] on its own line for a section divider"
+      ],
+      "details": [
+        "× only appears when more than one chapter exists — a book needs at least one",
+        "[image] places an uploaded image inline; without a marker it lands at the end",
+        "Set Chapter start at to 1 so an opening Prologue stays unnumbered"
+      ],
+      "suggestions": [
+        {
+          "label": "Book details",
+          "topic": "la-meta"
+        },
+        {
+          "label": "Images",
+          "topic": "la-media"
+        },
+        {
+          "label": "Exporting",
+          "topic": "la-export"
+        }
+      ]
+    },
+    {
+      "id": "la-meta",
+      "title": "Book & Story Details",
+      "terms": [
+        "meta",
+        "metadata",
+        "details",
+        "cover",
+        "cover image",
+        "title",
+        "language",
+        "description",
+        "prologue",
+        "chapter start",
+        "add a prologue",
+        "front matter",
+        "unnumbered chapter"
+      ],
+      "boost": 2,
+      "answer": "The Meta panel on the right holds everything that describes the work: title, author, language, cover, and — for books — a description and the chapter numbering offset.",
+      "details": [
+        "Language is a two-letter code: en, fr, zu and so on",
+        "Cover images look best at 1600 × 2400 px (2:3) — other ratios may letterbox",
+        "Description is written into EPUB metadata; library apps show it, the reader does not",
+        "Chapter start at 1 leaves your first chapter unnumbered, so a Prologue reads correctly"
+      ],
+      "suggestions": [
+        {
+          "label": "Chapters",
+          "topic": "la-chapters"
+        },
+        {
+          "label": "Theming",
+          "topic": "la-theme"
+        },
+        {
+          "label": "Exporting",
+          "topic": "la-export"
+        }
+      ]
+    },
+    {
+      "id": "la-workflow-name",
+      "title": "Worked Example — Name The Reader",
+      "terms": [
+        "name the player",
+        "name the reader",
+        "address the reader",
+        "use their name",
+        "personalise",
+        "personalize",
+        "ask the reader their name",
+        "reader their name",
+        "ask for a name"
+      ],
+      "boost": 2,
+      "answer": "Ask the reader their name once at the start, then address them by it for the rest of the story.",
+      "steps": [
+        "Add a variable: name playerName, type text, default blank",
+        "Set your opening scene to Player input",
+        "Prompt “What is your name, traveller?”, store in playerName, next scene = your second scene",
+        "Write {{playerName}} in any later scene to address them"
+      ],
+      "suggestions": [
+        {
+          "label": "Variables",
+          "topic": "la-variables"
+        },
+        {
+          "label": "Player input",
+          "topic": "la-player-input"
+        }
+      ]
+    },
+    {
+      "id": "la-workflow-score",
+      "title": "Worked Example — Track A Score",
+      "terms": [
+        "track a score",
+        "points",
+        "scoring",
+        "award points",
+        "final score",
+        "keep score"
+      ],
+      "boost": 2,
+      "answer": "Award points for brave choices and reveal the total on an ending scene.",
+      "steps": [
+        "Add a variable: name score, type number, default 0",
+        "On each choice that deserves points, add an effect: score · add · 10",
+        "Create an Ending scene and write “Final score: {{score}} points.”"
+      ],
+      "details": [
+        "{{score >= 50}} prints the calculated value — it does not hide text",
+        "To show different endings, put the condition on a choice leading to two different ending scenes"
+      ],
+      "suggestions": [
+        {
+          "label": "Variables",
+          "topic": "la-variables"
+        },
+        {
+          "label": "Conditions",
+          "topic": "la-conditions"
+        }
+      ]
+    },
+    {
+      "id": "la-workflow-lock",
+      "title": "Worked Example — Lock A Choice",
+      "terms": [
+        "locked door",
+        "lock behind an item",
+        "haskey",
+        "key",
+        "item",
+        "inventory",
+        "requires an item",
+        "lock a choice",
+        "lock a choice behind an item",
+        "locked choice"
+      ],
+      "boost": 2,
+      "answer": "Show “Unlock the door” only to readers who found the key earlier.",
+      "steps": [
+        "Add a variable: name hasKey, type text, default false",
+        "On the choice where the key is found, add an effect: hasKey · set · true",
+        "On the door scene add the choice “Unlock the door” → Inside the House",
+        "Set its condition to hasKey · eq · true",
+        "Add a second, unconditional choice as the fallback for readers without the key"
+      ],
+      "suggestions": [
+        {
+          "label": "Conditions",
+          "topic": "la-conditions"
+        },
+        {
+          "label": "Variables",
+          "topic": "la-variables"
+        }
+      ]
+    },
+    {
+      "id": "la-workflow-puzzle",
+      "title": "Worked Example — Timed Puzzle",
+      "terms": [
+        "timed puzzle",
+        "countdown",
+        "code word",
+        "access code",
+        "timer",
+        "against the clock"
+      ],
+      "boost": 2,
+      "answer": "Give the reader 30 seconds to type the right code word, with somewhere to go if they fail.",
+      "steps": [
+        "Add a text variable, e.g. codeAttempt",
+        "Set the puzzle scene to Player input, storing into it",
+        "Validation: match exact, correct answer LAZARUS, case-sensitive off, max attempts 3",
+        "On wrong answer → a Wrong Code scene",
+        "Time limit: 30 seconds, on timeout → a Time's Up scene"
+      ],
+      "suggestions": [
+        {
+          "label": "Player input",
+          "topic": "la-player-input"
+        },
+        {
+          "label": "Conditions",
+          "topic": "la-conditions"
+        }
+      ]
+    },
+    {
+      "id": "la-tips",
+      "title": "Writing Tips",
+      "terms": [
+        "tip",
+        "tips",
+        "best practice",
+        "advice",
+        "how should i",
+        "plan my story",
+        "structure"
+      ],
+      "boost": 2,
+      "answer": "Habits that keep a branching story manageable as it grows.",
+      "details": [
+        "Plan the scene tree first — 5 choices deep 3 levels is already 156 scenes",
+        "Name scenes clearly: “Ending — Coward's Way” beats “Scene 12” in every dropdown",
+        "One ending per branch, not one global ending — each outcome deserves its own conclusion",
+        "Keep variable names short: score, hasKey",
+        "Export early and read it in LazyReader — problems invisible in the editor show up there",
+        "Use [break] at every time skip or change of place"
+      ],
+      "suggestions": [
+        {
+          "label": "Previewing",
+          "topic": "la-preview"
+        },
+        {
+          "label": "Exporting",
+          "topic": "la-export"
+        },
+        {
+          "label": "Troubleshooting",
+          "topic": "la-troubleshooting"
+        }
+      ]
+    },
+    {
+      "id": "la-troubleshooting",
+      "title": "Troubleshooting",
+      "terms": [
+        "not working",
+        "broken",
+        "problem",
+        "wont",
+        "won't",
+        "failed",
+        "save failed",
+        "stuck",
+        "missing",
+        "error",
+        "undo",
+        "deleted a scene",
+        "export does nothing",
+        "export button",
+        "nothing happens",
+        "download never starts"
+      ],
+      "boost": 2,
+      "answer": "The problems that come up most, and what they usually mean.",
+      "details": [
+        "Export does nothing — you need at least one scene or chapter with content, and downloads allowed",
+        "Choices missing in preview — only Narrative scenes show choices, and every choice needs a target",
+        "A conditioned choice never appears — preview uses defaults, and gt 3 excludes 3 (use gte)",
+        "{{playerName}} shows literally — its default is blank; set a test default while writing",
+        "Save failed — the cloud write did not land; work is still local, so export a backup before refreshing",
+        "Deleted a scene — there is no undo, so export a draft before big structural changes"
+      ],
+      "suggestions": [
+        {
+          "label": "Previewing",
+          "topic": "la-preview"
+        },
+        {
+          "label": "Conditions",
+          "topic": "la-conditions"
+        },
+        {
+          "label": "Accounts & auto-save",
+          "topic": "la-account"
         }
       ]
     },

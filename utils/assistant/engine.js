@@ -162,6 +162,7 @@ export function createAssistant(knowledge, options = {}) {
       id: topic.id,
       title: topic.title,
       answer: topic.answer,
+      steps: topic.steps,
       details: topic.details,
       suggestions,
     };

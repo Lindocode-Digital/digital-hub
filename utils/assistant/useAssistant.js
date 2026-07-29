@@ -21,7 +21,7 @@ import { loadKnowledge } from "./client";
 import { BUNDLED_KNOWLEDGE } from "./knowledge";
 
 export function useAssistant(options = {}) {
-  const { links, thinkingMs = 420 } = options;
+  const { links, starterTopics, thinkingMs = 420 } = options;
 
   const router = useRouter();
 
@@ -41,6 +41,17 @@ export function useAssistant(options = {}) {
     () => createAssistant(knowledge, { links }),
     [knowledge, links],
   );
+
+  // A site can open on its own topics rather than the payload's global set —
+  // LazyAuthor leads with writing help, not studio services.
+  const starters = useMemo(() => {
+    if (!starterTopics) return assistant.starters;
+
+    return starterTopics
+      .map((id) => assistant.topics.find((topic) => topic.id === id))
+      .filter(Boolean)
+      .map((topic) => ({ label: topic.title, topic: topic.id }));
+  }, [assistant, starterTopics]);
 
   useEffect(() => {
     let active = true;
@@ -165,7 +176,8 @@ export function useAssistant(options = {}) {
     open,
     setOpen,
     thinking,
-    starters: assistant.starters,
+    starters,
+    topics: assistant.topics,
     ask,
     submit,
     choose,

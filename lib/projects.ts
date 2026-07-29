@@ -51,6 +51,31 @@ export const projects: Project[] = [
   {
     cardId: "01",
     slug: "/",
+    domain: "lazystore.lindocode.com",
+    title: "LazyStore",
+    cardTitle: "LazyStore",
+    cardSubtitle: "Books",
+    description: [
+      "Books. Ready in one scan.",
+      "LazyStore is the browsable catalog behind LazyReader. Pick a title, scan its QR code (or type the code) and it's added straight to your LazyReader library - no downloads, no file wrangling. Search titles, authors, and tags, filter by category, and get every book ready to read in one scan.",
+    ],
+    extra: "Books. Ready in one scan.",
+    image: "/digitalhub/projects/lazystore.jpg",
+    background: "/digitalhub/projects/preview.png",
+    color: "",
+    link: "https://lazystore.lindocode.com",
+    attribute: {
+      artistName: "Sdrow Vieli",
+      artistLink:
+        "https://unsplash.com/@kellysikkema?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistWorkLink:
+        "https://unsplash.com/photos/yellow-click-pen-on-white-printer-paper-gcHFXsdcmJE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
+      artistPlatform: "DigitalHub",
+    },
+  },
+  {
+    cardId: "02",
+    slug: "/",
     domain: "lindocode.com",
     title: "Lindocode Digital",
     cardTitle: "Lindocode Digital™",
@@ -66,31 +91,6 @@ export const projects: Project[] = [
       "https://objectstorage.ca-montreal-1.oraclecloud.com/n/axl9dc7vfz2c/b/bucket-20250511-1735/o/main-cards%2Fscreenshot_image5.png",
     color: "",
     link: "https://lindocode.com",
-    attribute: {
-      artistName: "Sdrow Vieli",
-      artistLink:
-        "https://unsplash.com/@kellysikkema?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
-      artistWorkLink:
-        "https://unsplash.com/photos/yellow-click-pen-on-white-printer-paper-gcHFXsdcmJE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash",
-      artistPlatform: "DigitalHub",
-    },
-  },
-  {
-    cardId: "02",
-    slug: "/",
-    domain: "lazystore.lindocode.com",
-    title: "LazyStore",
-    cardTitle: "LazyStore",
-    cardSubtitle: "Books",
-    description: [
-      "Books. Ready in one scan.",
-      "LazyStore is the browsable catalog behind LazyReader. Pick a title, scan its QR code (or type the code) and it's added straight to your LazyReader library - no downloads, no file wrangling. Search titles, authors, and tags, filter by category, and get every book ready to read in one scan.",
-    ],
-    extra: "Books. Ready in one scan.",
-    image: "/digitalhub/projects/lazystore.jpg",
-    background: "/digitalhub/projects/preview.png",
-    color: "",
-    link: "https://lazystore.lindocode.com",
     attribute: {
       artistName: "Sdrow Vieli",
       artistLink:
