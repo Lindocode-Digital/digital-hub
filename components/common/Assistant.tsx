@@ -29,8 +29,25 @@ export default function Assistant() {
   return (
     <div
       ref={a.containerRef}
-      className="fixed bottom-5 right-5 z-[1200] flex flex-col items-end gap-3"
+      className="fixed top-3 right-3 z-[1200] flex flex-col items-end gap-2 sm:top-5 sm:right-5 sm:gap-3"
     >
+      <button
+        type="button"
+        onClick={() => a.setOpen(!a.open)}
+        aria-expanded={a.open}
+        aria-label={a.open ? "Close assistant" : "Open assistant"}
+        className={clsx(
+          // Compact on phones, full size from the sm breakpoint up.
+          "flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium text-white",
+          "sm:gap-2 sm:px-4 sm:py-3 sm:text-sm",
+          "shadow-[0_8px_24px_-6px_rgba(225,29,72,0.45)] transition",
+          a.open ? "bg-neutral-900" : "bg-rose-600 hover:bg-rose-700",
+        )}
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-white/90 sm:h-2 sm:w-2" />
+        {a.open ? "Close" : "Ask"}
+      </button>
+
       {a.open && (
         <div
           className="
@@ -133,21 +150,6 @@ export default function Assistant() {
           )}
         </div>
       )}
-
-      <button
-        type="button"
-        onClick={() => a.setOpen(!a.open)}
-        aria-expanded={a.open}
-        aria-label={a.open ? "Close assistant" : "Open assistant"}
-        className={clsx(
-          "flex items-center gap-2 rounded-full px-4 py-3 text-sm font-medium text-white",
-          "shadow-[0_10px_30px_-6px_rgba(225,29,72,0.5)] transition",
-          a.open ? "bg-neutral-900" : "bg-rose-600 hover:bg-rose-700",
-        )}
-      >
-        <span className="h-2 w-2 rounded-full bg-white/90" />
-        {a.open ? "Close" : "Ask"}
-      </button>
     </div>
   );
 }
