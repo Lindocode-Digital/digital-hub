@@ -10,6 +10,13 @@ export interface AssistantSuggestion {
   link?: string;
 }
 
+
+export interface AssistantTable {
+  title?: string;
+  columns: string[];
+  rows: string[][];
+}
+
 export interface AssistantTopic {
   id: string;
   title: string;
@@ -20,6 +27,8 @@ export interface AssistantTopic {
   /** Ordered walkthrough, for surfaces with room to show one. */
   steps?: string[];
   details?: string[];
+  /** Reference tables lifted from the product's own docs. */
+  tables?: AssistantTable[];
   suggestions: AssistantSuggestion[];
 }
 
@@ -37,6 +46,7 @@ export interface AssistantAnswer {
   answer: string;
   steps?: string[];
   details?: string[];
+  tables?: AssistantTable[];
   suggestions: AssistantSuggestion[];
 }
 

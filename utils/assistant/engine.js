@@ -142,8 +142,12 @@ export function createAssistant(knowledge, options = {}) {
     return suggestion;
   };
 
+  // A chip pointing at a topic this front end did not load is dropped rather
+  // than rendered dead — that is what makes optional topic packs safe.
   const resolveAll = (suggestions = []) =>
-    suggestions.map(resolve).filter((s) => s.topic || s.href || s.ask);
+    suggestions
+      .map(resolve)
+      .filter((s) => (s.topic ? byId.has(s.topic) : Boolean(s.href || s.ask)));
 
   const jump = (label, topic) => ({ label, topic });
 
@@ -164,6 +168,7 @@ export function createAssistant(knowledge, options = {}) {
       answer: topic.answer,
       steps: topic.steps,
       details: topic.details,
+      tables: topic.tables,
       suggestions,
     };
   }

@@ -21,7 +21,7 @@ import { loadKnowledge } from "./client";
 import { BUNDLED_KNOWLEDGE } from "./knowledge";
 
 export function useAssistant(options = {}) {
-  const { links, starterTopics, thinkingMs = 420 } = options;
+  const { links, starterTopics, extraTopics, thinkingMs = 420 } = options;
 
   const router = useRouter();
 
@@ -37,9 +37,16 @@ export function useAssistant(options = {}) {
   const lastTopicRef = useRef(null);
   const timerRef = useRef(null);
 
+  // A product can carry its own documentation locally rather than pushing it
+  // into the shared payload that every other front end downloads.
+  const merged = useMemo(() => {
+    if (!extraTopics?.length) return knowledge;
+    return { ...knowledge, topics: [...knowledge.topics, ...extraTopics] };
+  }, [knowledge, extraTopics]);
+
   const assistant = useMemo(
-    () => createAssistant(knowledge, { links }),
-    [knowledge, links],
+    () => createAssistant(merged, { links }),
+    [merged, links],
   );
 
   // A site can open on its own topics rather than the payload's global set —

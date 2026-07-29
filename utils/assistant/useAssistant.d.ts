@@ -28,5 +28,7 @@ export function useAssistant(options?: {
   links?: Record<string, string>;
   /** Topic ids to show before a question is asked. Must be a stable reference. */
   starterTopics?: string[];
+  /** Product-local topics merged into the shared base. Must be stable. */
+  extraTopics?: AssistantTopic[];
   thinkingMs?: number;
 }): UseAssistant;
