@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Jost, Playfair_Display, Montserrat } from "next/font/google";
 import "./globals.css";
+import Assistant from "@/components/common/Assistant";
 
 const jost = Jost({
   subsets: ["latin"],
@@ -86,6 +87,7 @@ export default function RootLayout({
         className={`${jost.variable} ${playfair.variable} ${montserrat.variable} font-sans antialiased bg-white text-neutral-900 overflow-x-hidden`}
       >
         {children}
+        <Assistant />
       </body>
     </html>
   );
