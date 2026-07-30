@@ -63,7 +63,7 @@ export default function Assistant() {
               className="text-sm font-semibold text-neutral-900"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Lindocode Assistant
+              Lindocode DigitalHub Assistant
             </span>
           </div>
 
