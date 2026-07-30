@@ -96,7 +96,7 @@ export default function CoverFlowCard({
             <span className="cflow-ui-index">
               {indexLabel ?? String(Math.abs(offset) + 1).padStart(2, "0")}
             </span>{" "}
-            <div className="cflow-ui-line" />
+            {/*  <div className="cflow-ui-line" /> */}
           </div>
 
           <div className="cflow-ui-content">
