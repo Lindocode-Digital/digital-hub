@@ -30,6 +30,10 @@ export type Project = {
   extra?: string;
   image: string;
   background?: string;
+  /** YouTube video id - when set, the overlay's showcase panel embeds this
+   *  instead of `background`/`image`. The carousel card thumbnail is
+   *  unaffected and keeps using `image`. */
+  previewVideo?: string;
   attribute?: ProjectAttribute;
   domain?: string;
   link?: string;
@@ -114,6 +118,7 @@ export const projects: Project[] = [
     ],
     image: "/digitalhub/projects/lazyreader.jpg",
     background: "/digitalhub/projects/lazyreader-preview.jpg",
+    previewVideo: "mW-6VWZ4kL4",
     color: "",
     link: "https://lazyreader.lindocode.com",
     playStoreLink:

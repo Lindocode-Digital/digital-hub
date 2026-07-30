@@ -269,6 +269,20 @@
   filter: saturate(0.96) contrast(1.06);
 }
 
+.threat-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.threat-video-frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
 .image-data-overlay {
   position: absolute;
   inset: 0;

@@ -624,7 +624,18 @@ export default function ProjectOverlay({
             {/* Left — image */}
             <div className="threat-image-panel">
               <div className="image-container">
-                {showcaseImageSrc ? (
+                {project.previewVideo ? (
+                  <div className="threat-video-frame">
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${project.previewVideo}`}
+                      title={`${project.title} showcase`}
+                      loading="lazy"
+                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  </div>
+                ) : showcaseImageSrc ? (
                   <>
                     {isImageLoading && !imageError && (
                       <div className="screenshot-loading">
