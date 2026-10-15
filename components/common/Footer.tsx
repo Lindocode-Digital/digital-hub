@@ -49,7 +49,7 @@ export default function Footer() {
         "
       >
         <Link
-          href="https://www.linkedin.com/company/lindocode-digital-pty-ltd"
+          href="https://www.linkedin.com/showcase/lazyappz"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-transform duration-200 hover:scale-110"
@@ -59,13 +59,29 @@ export default function Footer() {
         </Link>
 
         <Link
-          href="https://github.com/Lindocode-Digital"
+          href="https://github.com/Lazy-Appzzz"
           target="_blank"
           rel="noopener noreferrer"
           className="transition-transform duration-200 hover:scale-110"
           aria-label="GitHub"
         >
           <Github className="h-5 w-5 sm:h-5 sm:w-5" />
+        </Link>
+
+        <span aria-hidden="true" className="h-5 w-px bg-neutral-300" />
+
+        <Link
+          href="https://lindocode.com/"
+          className="transition-transform duration-200 hover:scale-110"
+          aria-label="LazyAppz by Lindocode Digital"
+        >
+          <img
+            src="/digitalhub/lazyappz-logo.svg"
+            alt=""
+            width={2826}
+            height={2114}
+            className="h-10 w-auto sm:h-12 lg:h-14"
+          />
         </Link>
       </div>
     </footer>
