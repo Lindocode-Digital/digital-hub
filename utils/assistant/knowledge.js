@@ -12,7 +12,7 @@
 
 export const BUNDLED_KNOWLEDGE = {
   "version": 3,
-  "updated_at": "2026-07-29",
+  "updated_at": "2026-11-12",
   "links": {
     "about": "https://lindocode.com/#about",
     "whyUs": "https://lindocode.com/#why-us",
@@ -745,10 +745,10 @@ export const BUNDLED_KNOWLEDGE = {
         "library"
       ],
       "boost": 2,
-      "summary": "a distraction-free cloud ebook reader for EPUB and interactive fiction",
-      "answer": "A distraction-free ebook reader that reads straight from your cloud storage. Link Dropbox, Nextcloud or OneDrive and your library is already there - nothing to upload, copy or import. It also plays branching interactive fiction.",
+      "summary": "a distraction-free cloud reader for EPUB, FB2 and MOBI ebooks, audiobooks and interactive fiction",
+      "answer": "An ebook and audiobook reader built around your books, your storage, your way. Read straight from Dropbox, OneDrive, Koofr or Nextcloud, or from a folder on your phone - nothing to upload, and neither is forced. It also plays branching interactive fiction.",
       "details": [
-        "Reads EPUB from your own cloud, no transferring files",
+        "Reads EPUB, FB2, MOBI and AZW3 from your own cloud or phone, no transferring files",
         "Adjustable fonts, themes and brightness, no ads",
         "Highlights, notes, collections and read-aloud",
         "Offline downloads and automatic progress sync"
@@ -778,7 +778,7 @@ export const BUNDLED_KNOWLEDGE = {
     },
     {
       "id": "lr-clouds",
-      "title": "Cloud Storage",
+      "title": "Where Your Books Live",
       "terms": [
         "which cloud",
         "cloud storage",
@@ -790,15 +790,22 @@ export const BUNDLED_KNOWLEDGE = {
         "storage",
         "connect",
         "sync my books",
-        "self hosted"
+        "self hosted",
+        "koofr",
+        "local",
+        "on my phone",
+        "device",
+        "folder"
       ],
       "boost": 2,
-      "answer": "Three providers today: Dropbox, Nextcloud and OneDrive. You connect an account once, LazyReader browses your existing folders, and books open from where they already live.",
+      "answer": "Your books can live in the cloud, on your phone, or both - LazyReader doesn't force either. Cloud: Dropbox, OneDrive, Koofr and Nextcloud. On your phone: point LazyReader at a folder under Storage. Books open from where they already live.",
       "details": [
         "Dropbox - connect and browse your existing folders",
         "Nextcloud - including self-hosted servers, over WebDAV",
         "OneDrive - personal accounts",
-        "No uploading, no second copy, no import step"
+        "Koofr - with an app password",
+        "A folder on your phone - no cloud account needed",
+        "Free: one storage source at a time; Pro connects several"
       ],
       "suggestions": [
         {
@@ -825,18 +832,23 @@ export const BUNDLED_KNOWLEDGE = {
         "pdf",
         "mobi",
         "azw",
+        "azw3",
+        "fb2",
+        "drm",
+        "locked",
         "kindle",
         "ebook",
         "what files",
         "support pdf"
       ],
       "boost": 1,
-      "answer": "LazyReader is built around EPUB - the whole reader, from pagination to highlights to read-aloud, is designed for it. Interactive stories are EPUB too, exported from LazyAuthor.",
+      "answer": "LazyReader opens EPUB, FB2 and MOBI/AZW3 ebooks, and M4B, M4A and MP3 audiobooks. FB2 and MOBI books are prepared as an EPUB the first time they open, so highlights, notes, read-aloud, search and the dictionary all work on them too. Interactive stories are EPUB, exported from LazyAuthor.",
       "details": [
-        "EPUB is the supported format, including EPUB 3 features",
-        "Interactive stories ship as EPUB exports from LazyAuthor",
+        "EPUB, including EPUB 3 features",
+        "FB2, plain or zipped (.fb2.zip), and MOBI, AZW3, AZW and PRC",
+        "Japanese, Chinese and Korean books written top to bottom, and Arabic and Hebrew books, read in their own page order",
         "Covers and metadata read from the file itself",
-        "Kindle-native formats such as AZW are not supported"
+        "Kindle books locked by their seller (DRM) cannot be opened, and PDF is not supported yet"
       ],
       "suggestions": [
         {
@@ -984,7 +996,7 @@ export const BUNDLED_KNOWLEDGE = {
         "afrikaans"
       ],
       "boost": 2,
-      "answer": "The app interface ships in six languages: English, Spanish, French, German, Italian and Portuguese. That is the interface itself - books are in whatever language they were written.",
+      "answer": "The app interface ships in ten languages: English, Spanish, French, German, Italian, Portuguese, Japanese, Chinese, Korean and Bengali. That is the interface itself - books are in whatever language they were written.",
       "suggestions": [
         {
           "label": "Reading features",
@@ -1011,7 +1023,7 @@ export const BUNDLED_KNOWLEDGE = {
         "safe books"
       ],
       "boost": 2,
-      "answer": "We do not download or store your books. LazyReader opens them where they already sit in your cloud account, so your library stays yours and stays private.",
+      "answer": "Your books, your storage, your way. Read them straight from your cloud account, keep them on your device, or mix both - LazyReader never forces either, and we never keep a copy of your books on our servers.",
       "details": [
         "No server-side copy of your library is kept",
         "Cloud access is scoped to reading your own files",
@@ -1052,10 +1064,10 @@ export const BUNDLED_KNOWLEDGE = {
         "available"
       ],
       "boost": 1,
-      "answer": "LazyReader is live on Google Play - search LazyReader or install it straight from the store listing. It is free to install, and you connect your own cloud storage once it is open.",
+      "answer": "LazyReader is live on Google Play - search LazyReader or install it straight from the store listing. It is free to install, and you connect your own cloud storage or a folder on your phone once it is open.",
       "details": [
         "Free on Google Play, no payment to install",
-        "Connect Dropbox, Nextcloud or OneDrive on first run",
+        "Connect a cloud service or pick a folder on your phone",
         "Your existing books show up - nothing to upload",
         "News, feature requests and bug reports live on the LazyReader site"
       ],
@@ -1135,8 +1147,8 @@ export const BUNDLED_KNOWLEDGE = {
       "summary": "a free browser tool for writing books and branching interactive stories",
       "answer": "LazyAuthor is the free writing tool behind LazyReader, at lazyauthor.lindocode.com. Pick one of two editors when you start: Interactive Story for branching fiction, or Book for a straight ebook. Everything auto-saves as you type.",
       "details": [
-        "Interactive Story — scenes, choices, variables, conditions, endings",
-        "Book — chapters, table of contents, cover art, inline images",
+        "Interactive Story - scenes, choices, variables, conditions, endings",
+        "Book - chapters, table of contents, cover art, inline images",
         "Auto-save and sync, so nothing depends on remembering to save",
         "Preview any scene, then export straight to EPUB",
         "Full writing help lives in the assistant inside LazyAuthor itself"
